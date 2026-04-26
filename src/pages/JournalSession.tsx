@@ -388,6 +388,32 @@ export default function JournalSession() {
           </button>
         </div>
       </div>
+
+      <AlertDialog open={confirmBackOpen} onOpenChange={setConfirmBackOpen}>
+        <AlertDialogContent className="border-line-strong bg-paper">
+          <AlertDialogHeader>
+            <AlertDialogTitle className="font-serif text-ink">Leave without saving?</AlertDialogTitle>
+            <AlertDialogDescription className="font-serif italic text-ink-2">
+              Your writing won't be kept. You can stay and finish, or discard it.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel className="rounded border-line-strong bg-transparent font-mono text-[11px] uppercase tracking-[0.12em] text-ink-2 hover:bg-ink/5">
+              Keep writing
+            </AlertDialogCancel>
+            <AlertDialogAction
+              onClick={() => {
+                savedRef.current = true;
+                setConfirmBackOpen(false);
+                navigate(-1);
+              }}
+              className="rounded bg-ink font-mono text-[11px] uppercase tracking-[0.12em] text-paper hover:bg-ink/90"
+            >
+              Discard
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }
