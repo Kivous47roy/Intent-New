@@ -6,6 +6,16 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 
 type SortBucket = "do" | "defer" | "delete";
 type IfThen = { if: string; then: string };
@@ -37,6 +47,8 @@ export default function JournalSession() {
   const [phase, setPhase] = useState<"write" | "sort">("write");
   const [sorts, setSorts] = useState<Record<number, SortBucket>>({});
   const [submitting, setSubmitting] = useState(false);
+  const [confirmBackOpen, setConfirmBackOpen] = useState(false);
+  const savedRef = useRef(false);
   const startRef = useRef<number>(Date.now());
 
   useEffect(() => {
@@ -49,6 +61,48 @@ export default function JournalSession() {
     const id = setInterval(() => setSeconds((s) => s - 1), 1000);
     return () => clearInterval(id);
   }, [running]);
+
+  const hasContent =
+    text.trim().length > 0 ||
+    threes.some((t) => t.trim()) ||
+    ifThens.some((p) => p.if.trim() || p.then.trim());
+
+  // Resume timer once user starts editing content
+  const ensureRunning = () => {
+    if (!running) setRunning(true);
+  };
+
+  // Browser back / swipe-back guard
+  useEffect(() => {
+    if (!hasContent) return;
+    window.history.pushState({ guard: true }, "");
+    const onPop = () => {
+      // Re-push so we stay on the page until confirmed
+      window.history.pushState({ guard: true }, "");
+      setConfirmBackOpen(true);
+    };
+    window.addEventListener("popstate", onPop);
+
+    const onBeforeUnload = (e: BeforeUnloadEvent) => {
+      if (savedRef.current) return;
+      e.preventDefault();
+      e.returnValue = "";
+    };
+    window.addEventListener("beforeunload", onBeforeUnload);
+
+    return () => {
+      window.removeEventListener("popstate", onPop);
+      window.removeEventListener("beforeunload", onBeforeUnload);
+    };
+  }, [hasContent]);
+
+  const requestBack = () => {
+    if (hasContent) {
+      setConfirmBackOpen(true);
+    } else {
+      navigate(-1);
+    }
+  };
 
   if (!config) {
     return (
@@ -119,6 +173,7 @@ export default function JournalSession() {
         completed: true,
       });
       if (error) throw error;
+      savedRef.current = true;
       await qc.invalidateQueries({ queryKey: ["streak"] });
       await qc.invalidateQueries({ queryKey: ["entries"] });
       toast.success("Kept.");
@@ -140,7 +195,7 @@ export default function JournalSession() {
       {/* Top bar */}
       <div className="flex items-center justify-between px-5 pt-2">
         <button
-          onClick={() => navigate(-1)}
+          onClick={requestBack}
           className="flex h-10 w-10 items-center justify-center rounded border border-line-strong bg-white/40 text-ink-2 transition-colors hover:text-ink"
           aria-label="Back"
         >
@@ -205,6 +260,7 @@ export default function JournalSession() {
                 <input
                   value={v}
                   onChange={(e) => {
+                    ensureRunning();
                     const n = threes.slice();
                     n[i] = e.target.value;
                     setThrees(n);
@@ -229,6 +285,7 @@ export default function JournalSession() {
                   <input
                     value={v.if}
                     onChange={(e) => {
+                      ensureRunning();
                       const n = ifThens.slice();
                       n[i] = { ...n[i], if: e.target.value };
                       setIfThens(n);
@@ -242,6 +299,7 @@ export default function JournalSession() {
                   <input
                     value={v.then}
                     onChange={(e) => {
+                      ensureRunning();
                       const n = ifThens.slice();
                       n[i] = { ...n[i], then: e.target.value };
                       setIfThens(n);
@@ -259,7 +317,10 @@ export default function JournalSession() {
           <textarea
             autoFocus
             value={text}
-            onChange={(e) => setText(e.target.value)}
+            onChange={(e) => {
+              ensureRunning();
+              setText(e.target.value);
+            }}
             placeholder={config.id === "brain_dump" ? "one thought per line\nor however it spills out…" : "just begin…"}
             className={`min-h-[40vh] flex-1 resize-none bg-transparent font-serif text-[18px] leading-[1.55] outline-none placeholder:text-ink-3/70 ${
               config.id === "expressive" ? "ruled" : ""
@@ -327,6 +388,32 @@ export default function JournalSession() {
           </button>
         </div>
       </div>
+
+      <AlertDialog open={confirmBackOpen} onOpenChange={setConfirmBackOpen}>
+        <AlertDialogContent className="border-line-strong bg-paper">
+          <AlertDialogHeader>
+            <AlertDialogTitle className="font-serif text-ink">Leave without saving?</AlertDialogTitle>
+            <AlertDialogDescription className="font-serif italic text-ink-2">
+              Your writing won't be kept. You can stay and finish, or discard it.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel className="rounded border-line-strong bg-transparent font-mono text-[11px] uppercase tracking-[0.12em] text-ink-2 hover:bg-ink/5">
+              Keep writing
+            </AlertDialogCancel>
+            <AlertDialogAction
+              onClick={() => {
+                savedRef.current = true;
+                setConfirmBackOpen(false);
+                navigate(-1);
+              }}
+              className="rounded bg-ink font-mono text-[11px] uppercase tracking-[0.12em] text-paper hover:bg-ink/90"
+            >
+              Discard
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }
