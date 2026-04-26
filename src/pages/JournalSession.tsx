@@ -405,7 +405,8 @@ export default function JournalSession() {
               onClick={() => {
                 savedRef.current = true;
                 setConfirmBackOpen(false);
-                navigate(-1);
+                // Go back past the guard entry we pushed
+                navigate(-2);
               }}
               className="rounded bg-ink font-mono text-[11px] uppercase tracking-[0.12em] text-paper hover:bg-ink/90"
             >
