@@ -317,7 +317,10 @@ export default function JournalSession() {
           <textarea
             autoFocus
             value={text}
-            onChange={(e) => setText(e.target.value)}
+            onChange={(e) => {
+              ensureRunning();
+              setText(e.target.value);
+            }}
             placeholder={config.id === "brain_dump" ? "one thought per line\nor however it spills out…" : "just begin…"}
             className={`min-h-[40vh] flex-1 resize-none bg-transparent font-serif text-[18px] leading-[1.55] outline-none placeholder:text-ink-3/70 ${
               config.id === "expressive" ? "ruled" : ""
