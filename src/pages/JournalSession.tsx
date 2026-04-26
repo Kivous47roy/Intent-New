@@ -195,7 +195,7 @@ export default function JournalSession() {
       {/* Top bar */}
       <div className="flex items-center justify-between px-5 pt-2">
         <button
-          onClick={() => navigate(-1)}
+          onClick={requestBack}
           className="flex h-10 w-10 items-center justify-center rounded border border-line-strong bg-white/40 text-ink-2 transition-colors hover:text-ink"
           aria-label="Back"
         >
