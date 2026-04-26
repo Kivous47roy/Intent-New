@@ -54,6 +54,7 @@ export type Database = {
         Row: {
           created_at: string
           display_name: string | null
+          evening_reminder_time: string | null
           id: string
           morning_reminder_time: string | null
           onboarding_completed: boolean
@@ -63,6 +64,7 @@ export type Database = {
         Insert: {
           created_at?: string
           display_name?: string | null
+          evening_reminder_time?: string | null
           id?: string
           morning_reminder_time?: string | null
           onboarding_completed?: boolean
@@ -72,6 +74,7 @@ export type Database = {
         Update: {
           created_at?: string
           display_name?: string | null
+          evening_reminder_time?: string | null
           id?: string
           morning_reminder_time?: string | null
           onboarding_completed?: boolean
