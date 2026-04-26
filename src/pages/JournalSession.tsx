@@ -320,7 +320,7 @@ export default function JournalSession() {
           <button
             onClick={handleCta}
             disabled={submitting}
-            className="flex h-13 w-full items-center justify-between rounded bg-ink px-5 py-4 text-paper transition-opacity disabled:opacity-60"
+            className="flex h-14 w-full items-center justify-between rounded bg-ink px-5 py-4 text-paper transition-opacity disabled:opacity-60"
           >
             <span className="text-[15px] font-medium">{submitting ? "Saving…" : ctaLabel}</span>
             <Check className="h-4 w-4" strokeWidth={2.2} />

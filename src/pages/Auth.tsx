@@ -113,7 +113,7 @@ export default function Auth() {
           <button
             type="submit"
             disabled={submitting}
-            className="mt-3 flex h-13 w-full items-center justify-between rounded bg-ink px-5 py-4 text-paper transition-opacity disabled:opacity-60"
+            className="mt-3 flex h-14 w-full items-center justify-between rounded bg-ink px-5 py-4 text-paper transition-opacity disabled:opacity-60"
           >
             <span className="text-[15px] font-medium">
               {submitting ? "Just a moment…" : mode === "signup" ? "Create account" : "Sign in"}
