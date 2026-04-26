@@ -285,6 +285,7 @@ export default function JournalSession() {
                   <input
                     value={v.if}
                     onChange={(e) => {
+                      ensureRunning();
                       const n = ifThens.slice();
                       n[i] = { ...n[i], if: e.target.value };
                       setIfThens(n);
@@ -298,6 +299,7 @@ export default function JournalSession() {
                   <input
                     value={v.then}
                     onChange={(e) => {
+                      ensureRunning();
                       const n = ifThens.slice();
                       n[i] = { ...n[i], then: e.target.value };
                       setIfThens(n);
