@@ -173,6 +173,7 @@ export default function JournalSession() {
         completed: true,
       });
       if (error) throw error;
+      savedRef.current = true;
       await qc.invalidateQueries({ queryKey: ["streak"] });
       await qc.invalidateQueries({ queryKey: ["entries"] });
       toast.success("Kept.");
