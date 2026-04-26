@@ -83,7 +83,7 @@ export default function Profile() {
     return { current, longest, total: entries.length, top: topTitle };
   }, [entries]);
 
-  const save = async (patch: Record<string, any>) => {
+  const save = async (patch: Partial<{ display_name: string; morning_reminder_time: string; evening_reminder_time: string }>) => {
     if (!user) return;
     const { error } = await supabase.from("profiles").update(patch).eq("user_id", user.id);
     if (error) {
