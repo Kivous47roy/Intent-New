@@ -47,6 +47,8 @@ export default function JournalSession() {
   const [phase, setPhase] = useState<"write" | "sort">("write");
   const [sorts, setSorts] = useState<Record<number, SortBucket>>({});
   const [submitting, setSubmitting] = useState(false);
+  const [confirmBackOpen, setConfirmBackOpen] = useState(false);
+  const savedRef = useRef(false);
   const startRef = useRef<number>(Date.now());
 
   useEffect(() => {
@@ -59,6 +61,48 @@ export default function JournalSession() {
     const id = setInterval(() => setSeconds((s) => s - 1), 1000);
     return () => clearInterval(id);
   }, [running]);
+
+  const hasContent =
+    text.trim().length > 0 ||
+    threes.some((t) => t.trim()) ||
+    ifThens.some((p) => p.if.trim() || p.then.trim());
+
+  // Resume timer once user starts editing content
+  const ensureRunning = () => {
+    if (!running) setRunning(true);
+  };
+
+  // Browser back / swipe-back guard
+  useEffect(() => {
+    if (!hasContent) return;
+    window.history.pushState({ guard: true }, "");
+    const onPop = () => {
+      // Re-push so we stay on the page until confirmed
+      window.history.pushState({ guard: true }, "");
+      setConfirmBackOpen(true);
+    };
+    window.addEventListener("popstate", onPop);
+
+    const onBeforeUnload = (e: BeforeUnloadEvent) => {
+      if (savedRef.current) return;
+      e.preventDefault();
+      e.returnValue = "";
+    };
+    window.addEventListener("beforeunload", onBeforeUnload);
+
+    return () => {
+      window.removeEventListener("popstate", onPop);
+      window.removeEventListener("beforeunload", onBeforeUnload);
+    };
+  }, [hasContent]);
+
+  const requestBack = () => {
+    if (hasContent) {
+      setConfirmBackOpen(true);
+    } else {
+      navigate(-1);
+    }
+  };
 
   if (!config) {
     return (
