@@ -1,0 +1,2 @@
+ALTER TABLE public.journal_entries DROP CONSTRAINT journal_entries_journal_type_check;
+ALTER TABLE public.journal_entries ADD CONSTRAINT journal_entries_journal_type_check CHECK (journal_type = ANY (ARRAY['brain_dump'::text, 'gratitude'::text, 'expressive'::text, 'implementation'::text, 'retrieval'::text, 'affirmation'::text]));
