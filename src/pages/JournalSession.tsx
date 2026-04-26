@@ -260,6 +260,7 @@ export default function JournalSession() {
                 <input
                   value={v}
                   onChange={(e) => {
+                    ensureRunning();
                     const n = threes.slice();
                     n[i] = e.target.value;
                     setThrees(n);
