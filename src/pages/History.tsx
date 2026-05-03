@@ -28,7 +28,7 @@ function calcStreak(dates: string[]): number {
 export default function History() {
   const { user } = useAuth();
   const [selectedDay, setSelectedDay] = useState<Date>(new Date());
-  const [expandedId, setExpandedId] = useState<string | null>(null);
+  
 
   const { data: entries = [], isLoading } = useQuery({
     queryKey: ["entries", user?.id],
@@ -107,14 +107,20 @@ export default function History() {
           onSelect={(d) => {
             if (d) {
               setSelectedDay(d);
-              setExpandedId(null);
+              
             }
           }}
           disabled={(date) => date > new Date()}
           modifiers={{ written: writtenDates }}
           modifiersClassNames={{
             written:
-              "relative font-semibold text-primary bg-accent-soft/60 rounded-full after:content-[''] after:absolute after:bottom-0.5 after:left-1/2 after:-translate-x-1/2 after:h-1 after:w-1 after:rounded-full after:bg-primary",
+              "relative font-semibold text-primary underline underline-offset-[6px] decoration-2 decoration-primary",
+          }}
+          classNames={{
+            day_today:
+              "ring-2 ring-primary ring-offset-1 ring-offset-background rounded-full font-bold text-ink",
+            day_selected:
+              "bg-primary text-primary-foreground hover:bg-primary hover:text-primary-foreground rounded-full",
           }}
           className="p-2 pointer-events-auto mx-auto"
         />
@@ -144,13 +150,10 @@ export default function History() {
               const cfg = JOURNALS[e.journal_type as JournalType];
               if (!cfg) return null;
               const Icon = cfg.icon;
-              const isOpen = expandedId === e.id;
               return (
-                <button
+                <div
                   key={e.id}
-                  type="button"
-                  onClick={() => setExpandedId(isOpen ? null : e.id)}
-                  className="block w-full rounded border border-line bg-white/60 px-3 py-2.5 text-left"
+                  className="rounded border border-line bg-white/60 px-3 py-2.5"
                 >
                   <div className="flex items-center gap-2.5">
                     <Icon
@@ -163,14 +166,10 @@ export default function History() {
                       {format(new Date(e.created_at), "HH:mm")}
                     </span>
                   </div>
-                  <p
-                    className={`mt-1.5 whitespace-pre-wrap font-serif text-[14px] leading-snug text-ink ${
-                      isOpen ? "" : "line-clamp-2"
-                    }`}
-                  >
+                  <p className="mt-1.5 whitespace-pre-wrap font-serif text-[14px] leading-relaxed text-ink">
                     {e.content?.trim() || <span className="italic text-ink-3">No content.</span>}
                   </p>
-                </button>
+                </div>
               );
             })}
           </div>
