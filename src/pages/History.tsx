@@ -100,14 +100,13 @@ export default function History() {
       </div>
 
       {/* Calendar */}
-      <div className="mx-5 mt-3 flex justify-center rounded border border-line bg-white/40">
+      <div className="mx-5 mt-3 flex shrink-0 justify-center rounded border border-line bg-white/40">
         <Calendar
           mode="single"
           selected={selectedDay}
           onSelect={(d) => {
             if (d) {
               setSelectedDay(d);
-              
             }
           }}
           disabled={(date) => date > new Date()}
@@ -121,13 +120,18 @@ export default function History() {
               "ring-2 ring-primary ring-offset-1 ring-offset-background rounded-full font-bold text-ink",
             day_selected:
               "bg-primary !text-primary-foreground hover:bg-primary hover:!text-primary-foreground rounded-full !no-underline",
+            month: "space-y-2",
+            row: "flex w-full mt-1",
+            head_cell: "text-muted-foreground rounded-md w-9 font-normal text-[0.7rem]",
+            cell: "h-8 w-9 text-center text-sm p-0 relative",
+            day: "h-8 w-9 p-0 font-normal aria-selected:opacity-100",
           }}
           className="p-2 pointer-events-auto mx-auto"
         />
       </div>
 
       {/* Day detail */}
-      <div className="mx-5 mt-3 mb-4 flex-1 flex flex-col rounded border border-line bg-white/40 min-h-[40vh] safe-bottom overflow-hidden">
+      <div className="mx-2 md:mx-5 mt-3 mb-4 flex-1 min-h-0 flex flex-col rounded border border-line bg-white/40 safe-bottom overflow-hidden">
         <div className="px-4 pt-4 pb-2 flex items-baseline gap-3">
           <span className="font-mono text-[10px] uppercase tracking-[0.18em] text-ink-3">
             {format(selectedDay, "EEE, d MMM").toUpperCase()}
