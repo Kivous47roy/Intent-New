@@ -100,7 +100,7 @@ export default function History() {
       </div>
 
       {/* Calendar */}
-      <div className="mx-5 mt-3 rounded border border-line bg-white/40">
+      <div className="mx-5 mt-3 flex justify-center rounded border border-line bg-white/40">
         <Calendar
           mode="single"
           selected={selectedDay}
@@ -114,9 +114,9 @@ export default function History() {
           modifiers={{ written: writtenDates }}
           modifiersClassNames={{
             written:
-              "relative after:content-[''] after:absolute after:bottom-1 after:left-1/2 after:-translate-x-1/2 after:h-1 after:w-1 after:rounded-full after:bg-ink",
+              "relative font-semibold text-primary bg-accent-soft/60 rounded-full after:content-[''] after:absolute after:bottom-0.5 after:left-1/2 after:-translate-x-1/2 after:h-1 after:w-1 after:rounded-full after:bg-primary",
           }}
-          className="p-2 pointer-events-auto"
+          className="p-2 pointer-events-auto mx-auto"
         />
       </div>
 
