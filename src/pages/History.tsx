@@ -130,10 +130,6 @@ export default function History() {
                         {isToday ? "Today is still open." : "—"}
                       </p>
                     ) : (
-                      <p className="font-serif text-[14px] italic text-ink-3">
-                        {isToday ? "Today is still open." : "—"}
-                      </p>
-                    ) : (
                       <div className="space-y-1.5">
                         {dayEntries.map((e: any) => {
                           const cfg = JOURNALS[e.journal_type as JournalType];
