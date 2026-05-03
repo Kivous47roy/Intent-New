@@ -196,6 +196,13 @@ export default function Profile() {
             </span>
           </button>
         </div>
+
+        {/* Footer mark — fills empty space gracefully */}
+        <div className="mt-6 flex flex-col items-center gap-1.5 pb-2">
+          <div className="h-px w-10 bg-ink/15" />
+          <p className="font-display text-[18px] italic leading-none text-ink-3">Intent</p>
+          <p className="font-mono text-[9px] tracking-[0.18em] text-ink-3">— DAILY PRACTICE —</p>
+        </div>
       </div>
     </div>
   );
