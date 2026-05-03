@@ -114,7 +114,13 @@ export default function History() {
           modifiers={{ written: writtenDates }}
           modifiersClassNames={{
             written:
-              "relative font-semibold text-primary bg-accent-soft/60 rounded-full after:content-[''] after:absolute after:bottom-0.5 after:left-1/2 after:-translate-x-1/2 after:h-1 after:w-1 after:rounded-full after:bg-primary",
+              "relative font-semibold text-primary underline underline-offset-[6px] decoration-2 decoration-primary",
+          }}
+          classNames={{
+            day_today:
+              "ring-2 ring-primary ring-offset-1 ring-offset-background rounded-full font-bold text-ink",
+            day_selected:
+              "bg-primary text-primary-foreground hover:bg-primary hover:text-primary-foreground rounded-full",
           }}
           className="p-2 pointer-events-auto mx-auto"
         />
