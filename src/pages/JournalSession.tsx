@@ -217,7 +217,15 @@ export default function JournalSession() {
           </button>
         </div>
 
-        <div className="h-10 w-10" />
+        <button
+          onClick={handleCta}
+          disabled={submitting}
+          className="flex h-10 w-10 items-center justify-center rounded border border-line-strong bg-ink text-paper transition-opacity disabled:opacity-60"
+          aria-label={ctaLabel}
+          title={ctaLabel}
+        >
+          <Check className="h-4 w-4" strokeWidth={2.2} />
+        </button>
       </div>
 
       {/* Progress bar */}
@@ -366,7 +374,7 @@ export default function JournalSession() {
 
       {/* Footer */}
       <div className="fixed bottom-0 left-0 right-0 z-20 bg-gradient-to-t from-paper via-paper to-transparent pt-6">
-        <div className="mx-auto max-w-md px-6 pb-7">
+        <div className="mx-auto max-w-md px-6 pb-7 safe-bottom">
           <div className="mb-2.5 flex items-center gap-3">
             <span className="font-mono text-[10px] tracking-[0.12em] text-ink-3">{meta}</span>
             <div className="h-px flex-1 bg-ink/10" />
