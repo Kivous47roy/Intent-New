@@ -217,33 +217,33 @@ function ReminderRow({
   onTime: (v: string) => void;
 }) {
   return (
-    <div className="px-4 py-3.5">
+    <div className="px-3 py-2.5">
       <div className="flex items-center justify-between">
-        <span className="flex items-center gap-2.5 text-[14px]">
+        <span className="flex items-center gap-2 text-[12px]">
           <span className="text-ink-2">{icon}</span>
           {label}
         </span>
         <button
           type="button"
           onClick={() => setOn(!on)}
-          className="relative h-[22px] w-10 rounded-full transition-colors"
+          className="relative h-[20px] w-9 rounded-full transition-colors"
           style={{ background: on ? "hsl(var(--ink))" : "hsl(var(--paper-3))" }}
           aria-pressed={on}
         >
           <span
-            className="absolute top-[2px] h-[18px] w-[18px] rounded-full bg-paper transition-all"
-            style={{ left: on ? 20 : 2, boxShadow: "0 1px 2px hsl(var(--ink) / 0.25)" }}
+            className="absolute top-[2px] h-[16px] w-[16px] rounded-full bg-paper transition-all"
+            style={{ left: on ? 18 : 2, boxShadow: "0 1px 2px hsl(var(--ink) / 0.25)" }}
           />
         </button>
       </div>
       {on && (
-        <div className="mt-2.5 flex items-center justify-between">
-          <span className="font-mono text-[11px] uppercase tracking-[0.08em] text-ink-3">EVERY DAY AT</span>
+        <div className="mt-1.5 flex items-center justify-between">
+          <span className="font-mono text-[10px] uppercase tracking-[0.08em] text-ink-3">EVERY DAY AT</span>
           <input
             type="time"
             value={time}
             onChange={(e) => onTime(e.target.value)}
-            className="w-24 bg-transparent text-right font-display text-[18px] outline-none"
+            className="w-20 bg-transparent text-right font-display text-[14px] outline-none"
           />
         </div>
       )}
