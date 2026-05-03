@@ -28,7 +28,7 @@ function calcStreak(dates: string[]): number {
 export default function History() {
   const { user } = useAuth();
   const [selectedDay, setSelectedDay] = useState<Date>(new Date());
-  const [expandedId, setExpandedId] = useState<string | null>(null);
+  
 
   const { data: entries = [], isLoading } = useQuery({
     queryKey: ["entries", user?.id],
