@@ -111,19 +111,25 @@ export default function History() {
               const dayEntries = entriesByDay[key] ?? [];
               const isToday = i === 0;
               return (
-                <div key={key} className="flex gap-3 border-t border-line py-2">
+                <div key={key} className={`flex gap-3 border-t border-line ${dayEntries.length === 0 ? "py-1" : "py-2"}`}>
                   <div className="w-10 shrink-0">
                     <div
-                      className={`font-display text-[18px] leading-none ${isToday ? "italic" : ""}`}
+                      className={`font-display leading-none ${dayEntries.length === 0 ? "text-[14px] text-ink-3" : "text-[18px]"} ${isToday ? "italic" : ""}`}
                     >
                       {String(d.getDate()).padStart(2, "0")}
                     </div>
-                    <div className="mt-0.5 font-mono text-[8px] tracking-[0.12em] text-ink-3">
-                      {format(d, "EEE").toUpperCase()}
-                    </div>
+                    {dayEntries.length > 0 && (
+                      <div className="mt-0.5 font-mono text-[8px] tracking-[0.12em] text-ink-3">
+                        {format(d, "EEE").toUpperCase()}
+                      </div>
+                    )}
                   </div>
                   <div className="flex-1 pt-0.5">
                     {dayEntries.length === 0 ? (
+                      <p className="font-serif text-[12px] italic text-ink-3">
+                        {isToday ? "Today is still open." : "—"}
+                      </p>
+                    ) : (
                       <p className="font-serif text-[14px] italic text-ink-3">
                         {isToday ? "Today is still open." : "—"}
                       </p>
