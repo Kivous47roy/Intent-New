@@ -74,7 +74,7 @@ export default function History() {
   );
 
   return (
-    <div className="flex-1 overflow-y-auto flex flex-col">
+    <div className="flex-1 min-h-0 overflow-hidden flex flex-col">
       <div className="safe-top" />
 
       <div className="px-5 pt-2">
@@ -127,8 +127,8 @@ export default function History() {
       </div>
 
       {/* Day detail */}
-      <div className="mx-5 mt-3 mb-4 flex-1 flex flex-col overflow-hidden rounded border border-line bg-white/40 p-4 pb-6 min-h-[40vh] safe-bottom">
-        <div className="mb-2 flex items-baseline gap-3">
+      <div className="mx-5 mt-3 mb-4 flex-1 flex flex-col rounded border border-line bg-white/40 min-h-[40vh] safe-bottom overflow-hidden">
+        <div className="px-4 pt-4 pb-2 flex items-baseline gap-3">
           <span className="font-mono text-[10px] uppercase tracking-[0.18em] text-ink-3">
             {format(selectedDay, "EEE, d MMM").toUpperCase()}
           </span>
@@ -138,42 +138,44 @@ export default function History() {
           </span>
         </div>
 
-        {isLoading ? (
-          <p className="text-sm text-ink-3">Loading…</p>
-        ) : dayEntries.length === 0 ? (
-          <p className="font-serif text-[14px] italic text-ink-3">
-            {isTodayFn(selectedDay) ? "Today is still open." : "Nothing written."}
-          </p>
-        ) : (
-          <div className="space-y-2">
-            {dayEntries.map((e: any) => {
-              const cfg = JOURNALS[e.journal_type as JournalType];
-              if (!cfg) return null;
-              const Icon = cfg.icon;
-              return (
-                <div
-                  key={e.id}
-                  className="overflow-hidden rounded border border-line bg-white/60 px-3 py-2.5"
-                >
-                  <div className="flex items-center gap-2.5">
-                    <Icon
-                      className="h-4 w-4 shrink-0"
-                      style={{ color: `hsl(var(${cfg.accentVar}))` }}
-                      strokeWidth={1.8}
-                    />
-                    <span className="font-serif text-[15px] font-medium">{cfg.title}</span>
-                    <span className="ml-auto font-mono text-[10px] tracking-[0.04em] text-ink-3">
-                      {format(new Date(e.created_at), "HH:mm")}
-                    </span>
+        <div className="flex-1 overflow-y-auto px-4 pb-6">
+          {isLoading ? (
+            <p className="text-sm text-ink-3">Loading…</p>
+          ) : dayEntries.length === 0 ? (
+            <p className="font-serif text-[14px] italic text-ink-3">
+              {isTodayFn(selectedDay) ? "Today is still open." : "Nothing written."}
+            </p>
+          ) : (
+            <div className="space-y-2">
+              {dayEntries.map((e: any) => {
+                const cfg = JOURNALS[e.journal_type as JournalType];
+                if (!cfg) return null;
+                const Icon = cfg.icon;
+                return (
+                  <div
+                    key={e.id}
+                    className="overflow-hidden rounded border border-line bg-white/60 px-3 py-2.5"
+                  >
+                    <div className="flex items-center gap-2.5">
+                      <Icon
+                        className="h-4 w-4 shrink-0"
+                        style={{ color: `hsl(var(${cfg.accentVar}))` }}
+                        strokeWidth={1.8}
+                      />
+                      <span className="font-serif text-[15px] font-medium">{cfg.title}</span>
+                      <span className="ml-auto font-mono text-[10px] tracking-[0.04em] text-ink-3">
+                        {format(new Date(e.created_at), "HH:mm")}
+                      </span>
+                    </div>
+                    <p className="mt-1.5 whitespace-pre-wrap break-words [overflow-wrap:anywhere] font-serif text-[14px] leading-relaxed text-ink">
+                      {e.content?.trim() || <span className="italic text-ink-3">No content.</span>}
+                    </p>
                   </div>
-                  <p className="mt-1.5 whitespace-pre-wrap break-words [overflow-wrap:anywhere] font-serif text-[14px] leading-relaxed text-ink">
-                    {e.content?.trim() || <span className="italic text-ink-3">No content.</span>}
-                  </p>
-                </div>
-              );
-            })}
-          </div>
-        )}
+                );
+              })}
+            </div>
+          )}
+        </div>
       </div>
     </div>
   );
