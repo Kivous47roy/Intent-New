@@ -127,7 +127,7 @@ export default function History() {
       </div>
 
       {/* Day detail */}
-      <div className="mx-5 mt-3 mb-4 flex-1 flex flex-col rounded border border-line bg-white/40 p-4 pb-6 min-h-[40vh] safe-bottom">
+      <div className="mx-5 mt-3 mb-4 flex-1 flex flex-col overflow-hidden rounded border border-line bg-white/40 p-4 pb-6 min-h-[40vh] safe-bottom">
         <div className="mb-2 flex items-baseline gap-3">
           <span className="font-mono text-[10px] uppercase tracking-[0.18em] text-ink-3">
             {format(selectedDay, "EEE, d MMM").toUpperCase()}
@@ -153,7 +153,7 @@ export default function History() {
               return (
                 <div
                   key={e.id}
-                  className="rounded border border-line bg-white/60 px-3 py-2.5"
+                  className="overflow-hidden rounded border border-line bg-white/60 px-3 py-2.5"
                 >
                   <div className="flex items-center gap-2.5">
                     <Icon
@@ -166,7 +166,7 @@ export default function History() {
                       {format(new Date(e.created_at), "HH:mm")}
                     </span>
                   </div>
-                  <p className="mt-1.5 whitespace-pre-wrap font-serif text-[14px] leading-relaxed text-ink">
+                  <p className="mt-1.5 whitespace-pre-wrap break-words [overflow-wrap:anywhere] font-serif text-[14px] leading-relaxed text-ink">
                     {e.content?.trim() || <span className="italic text-ink-3">No content.</span>}
                   </p>
                 </div>
