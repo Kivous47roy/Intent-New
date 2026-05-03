@@ -107,7 +107,7 @@ export default function History() {
           onSelect={(d) => {
             if (d) {
               setSelectedDay(d);
-              setExpandedId(null);
+              
             }
           }}
           disabled={(date) => date > new Date()}
