@@ -107,8 +107,8 @@ export default function Home() {
       </div>
 
       {/* Cards */}
-      <div className="flex-1 px-5 pb-3 pt-2">
-        <div className="space-y-1.5">
+      <div className="flex flex-1 flex-col px-5 pb-4 pt-2">
+        <div className="flex flex-1 flex-col justify-between gap-2">
           {JOURNAL_LIST.map((j) => {
             const Icon = j.icon;
             const done = completedToday.has(j.id);
@@ -117,7 +117,7 @@ export default function Home() {
               <Link
                 key={j.id}
                 to={`/journal/${j.id}`}
-                className={`relative block overflow-hidden rounded border px-3 py-2.5 transition-transform active:scale-[0.99] ${
+                className={`relative block flex-1 overflow-hidden rounded border px-3.5 py-3 transition-transform active:scale-[0.99] ${
                   done ? "border-line bg-paper-2 opacity-70" : "border-line-strong bg-card-paper"
                 }`}
               >
@@ -126,9 +126,9 @@ export default function Home() {
                   className={`pointer-events-none absolute inset-0 opacity-50 pat-${j.pattern}`}
                   aria-hidden
                 />
-                <div className="relative flex items-center gap-3">
+                <div className="relative flex h-full items-center gap-3">
                   <div
-                    className="flex h-9 w-9 shrink-0 items-center justify-center rounded border border-ink bg-paper"
+                    className="flex h-10 w-10 shrink-0 items-center justify-center rounded border border-ink bg-paper"
                     style={{ color: accent }}
                   >
                     <Icon className="h-4 w-4" strokeWidth={1.6} />
@@ -136,12 +136,12 @@ export default function Home() {
 
                   <div className="min-w-0 flex-1">
                     <div className="flex items-baseline gap-2">
-                      <h3 className="font-serif text-[15px] font-medium leading-tight text-ink truncate">
+                      <h3 className="font-serif text-[16px] font-medium leading-tight text-ink truncate">
                         {j.title}
                       </h3>
                       <span className="font-mono text-[9px] tracking-[0.1em] text-ink-3">{j.number}</span>
                     </div>
-                    <p className="mt-0.5 text-[11px] leading-snug text-ink-2 line-clamp-1">{j.blurb}</p>
+                    <p className="mt-0.5 text-[11.5px] leading-snug text-ink-2 line-clamp-1">{j.blurb}</p>
                   </div>
 
                   <div className="shrink-0">
