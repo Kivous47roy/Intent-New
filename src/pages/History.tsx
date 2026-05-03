@@ -112,13 +112,13 @@ export default function History() {
               const isToday = i === 0;
               return (
                 <div key={key} className="flex gap-3 border-t border-line py-2">
-                  <div className="w-14 shrink-0">
+                  <div className="w-10 shrink-0">
                     <div
-                      className={`font-display text-[26px] leading-none ${isToday ? "italic" : ""}`}
+                      className={`font-display text-[18px] leading-none ${isToday ? "italic" : ""}`}
                     >
                       {String(d.getDate()).padStart(2, "0")}
                     </div>
-                    <div className="mt-1 font-mono text-[9px] tracking-[0.12em] text-ink-3">
+                    <div className="mt-0.5 font-mono text-[8px] tracking-[0.12em] text-ink-3">
                       {format(d, "EEE").toUpperCase()}
                     </div>
                   </div>
