@@ -71,39 +71,38 @@ export default function History() {
     <div className="flex flex-1 flex-col">
       <div className="safe-top" />
 
-      <div className="px-6 pt-3">
-        <div className="mb-3 flex items-baseline gap-3">
-          <span className="font-mono text-[11px] uppercase tracking-[0.18em] text-ink-3">HISTORY</span>
+      <div className="px-5 pt-2">
+        <div className="mb-2 flex items-baseline gap-3">
+          <span className="font-mono text-[10px] uppercase tracking-[0.18em] text-ink-3">HISTORY</span>
           <div className="h-px flex-1 bg-ink/10" />
-          <span className="font-mono text-[11px] text-ink-3">14 DAYS</span>
+          <span className="font-mono text-[10px] text-ink-3">14 DAYS</span>
         </div>
-        <h1 className="font-display text-[34px] leading-[1.05]">
-          What you've<br />
-          <em className="font-serif not-italic font-normal italic">kept</em>.
+        <h1 className="font-display text-[24px] leading-[1.05]">
+          What you've <em className="font-serif not-italic font-normal italic">kept</em>.
         </h1>
       </div>
 
       {/* Stats strip */}
-      <div className="mx-6 mt-5 overflow-hidden rounded border border-line-strong bg-white/40">
+      <div className="mx-5 mt-2.5 overflow-hidden rounded border border-line-strong bg-white/40">
         <div className="flex">
           {[
             { n: String(streak), l: "STREAK" },
             { n: String(totalEntries), l: "ENTRIES" },
             { n: wordsLabel, l: "WORDS" },
           ].map((s, i) => (
-            <div key={s.l} className={`flex-1 px-4 py-3 ${i ? "border-l border-line" : ""}`}>
-              <div className="font-display text-[24px]">{s.n}</div>
-              <div className="mt-0.5 font-mono text-[10px] tracking-[0.12em] text-ink-3">{s.l}</div>
+            <div key={s.l} className={`flex-1 px-3 py-2 ${i ? "border-l border-line" : ""}`}>
+              <div className="font-display text-[18px] leading-none">{s.n}</div>
+              <div className="mt-1 font-mono text-[9px] tracking-[0.12em] text-ink-3">{s.l}</div>
             </div>
           ))}
         </div>
       </div>
 
-      <div className="px-6 pt-5">
-        <p className="mb-2 font-mono text-[10px] tracking-[0.12em] text-ink-3">── ENTRIES</p>
+      <div className="px-5 pt-3">
+        <p className="mb-1 font-mono text-[9px] tracking-[0.12em] text-ink-3">── ENTRIES</p>
       </div>
 
-      <div className="flex-1 px-6 pb-6">
+      <div className="flex-1 overflow-y-auto px-5 pb-3">
         {isLoading ? (
           <p className="text-sm text-ink-3">Loading…</p>
         ) : (
@@ -112,14 +111,14 @@ export default function History() {
               const dayEntries = entriesByDay[key] ?? [];
               const isToday = i === 0;
               return (
-                <div key={key} className="flex gap-4 border-t border-line py-3.5">
-                  <div className="w-14 shrink-0">
+                <div key={key} className="flex gap-3 border-t border-line py-2">
+                  <div className="w-10 shrink-0">
                     <div
-                      className={`font-display text-[26px] leading-none ${isToday ? "italic" : ""}`}
+                      className={`font-display text-[18px] leading-none ${isToday ? "italic" : ""}`}
                     >
                       {String(d.getDate()).padStart(2, "0")}
                     </div>
-                    <div className="mt-1 font-mono text-[9px] tracking-[0.12em] text-ink-3">
+                    <div className="mt-0.5 font-mono text-[8px] tracking-[0.12em] text-ink-3">
                       {format(d, "EEE").toUpperCase()}
                     </div>
                   </div>
