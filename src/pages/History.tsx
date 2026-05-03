@@ -1,12 +1,13 @@
-import { useMemo } from "react";
+import { useMemo, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { format } from "date-fns";
+import { format, isSameDay, isToday as isTodayFn } from "date-fns";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { JOURNALS, type JournalType } from "@/lib/journals";
+import { Calendar } from "@/components/ui/calendar";
 
-function startOfDayKey(d: Date) {
-  return `${d.getFullYear()}.${String(d.getMonth() + 1).padStart(2, "0")}.${String(d.getDate()).padStart(2, "0")}`;
+function dayKey(d: Date) {
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
 }
 
 function calcStreak(dates: string[]): number {
@@ -26,6 +27,9 @@ function calcStreak(dates: string[]): number {
 
 export default function History() {
   const { user } = useAuth();
+  const [selectedDay, setSelectedDay] = useState<Date>(new Date());
+  const [expandedId, setExpandedId] = useState<string | null>(null);
+
   const { data: entries = [], isLoading } = useQuery({
     queryKey: ["entries", user?.id],
     enabled: !!user,
@@ -44,39 +48,36 @@ export default function History() {
 
   const streak = calcStreak(entries.map((e: any) => e.created_at));
   const totalEntries = entries.length;
-  const totalWords = entries.reduce((sum: number, e: any) => sum + ((e.content ?? "").trim().split(/\s+/).filter(Boolean).length), 0);
+  const totalWords = entries.reduce(
+    (sum: number, e: any) => sum + (e.content ?? "").trim().split(/\s+/).filter(Boolean).length,
+    0,
+  );
   const wordsLabel = totalWords >= 1000 ? `${(totalWords / 1000).toFixed(1)}k` : String(totalWords);
 
-  const days = useMemo(() => {
-    const arr: { d: Date; key: string }[] = [];
-    const today = new Date();
-    for (let i = 0; i < 14; i++) {
-      const d = new Date(today);
-      d.setDate(today.getDate() - i);
-      arr.push({ d, key: startOfDayKey(d) });
-    }
-    return arr;
-  }, []);
-
-  const entriesByDay = useMemo(() => {
-    const m: Record<string, typeof entries> = {};
-    entries.forEach((e: any) => {
-      const k = startOfDayKey(new Date(e.created_at));
-      (m[k] ||= []).push(e);
-    });
-    return m;
+  const writtenDays = useMemo(() => {
+    const set = new Set<string>();
+    entries.forEach((e: any) => set.add(dayKey(new Date(e.created_at))));
+    return set;
   }, [entries]);
+
+  const writtenDates = useMemo(
+    () => Array.from(writtenDays).map((k) => {
+      const [y, m, d] = k.split("-").map(Number);
+      return new Date(y, m - 1, d);
+    }),
+    [writtenDays],
+  );
+
+  const dayEntries = useMemo(
+    () => entries.filter((e: any) => isSameDay(new Date(e.created_at), selectedDay)),
+    [entries, selectedDay],
+  );
 
   return (
     <div className="flex flex-1 flex-col">
       <div className="safe-top" />
 
       <div className="px-5 pt-2">
-        <div className="mb-2 flex items-baseline gap-3">
-          <span className="font-mono text-[10px] uppercase tracking-[0.18em] text-ink-3">HISTORY</span>
-          <div className="h-px flex-1 bg-ink/10" />
-          <span className="font-mono text-[10px] text-ink-3">14 DAYS</span>
-        </div>
         <h1 className="font-display text-[24px] leading-[1.05]">
           What you've <em className="font-serif not-italic font-normal italic">kept</em>.
         </h1>
@@ -98,68 +99,78 @@ export default function History() {
         </div>
       </div>
 
-      <div className="px-5 pt-3">
-        <p className="mb-1 font-mono text-[9px] tracking-[0.12em] text-ink-3">── ENTRIES</p>
+      {/* Calendar */}
+      <div className="mx-5 mt-3 rounded border border-line bg-white/40">
+        <Calendar
+          mode="single"
+          selected={selectedDay}
+          onSelect={(d) => {
+            if (d) {
+              setSelectedDay(d);
+              setExpandedId(null);
+            }
+          }}
+          disabled={(date) => date > new Date()}
+          modifiers={{ written: writtenDates }}
+          modifiersClassNames={{
+            written:
+              "relative after:content-[''] after:absolute after:bottom-1 after:left-1/2 after:-translate-x-1/2 after:h-1 after:w-1 after:rounded-full after:bg-ink",
+          }}
+          className="p-2 pointer-events-auto"
+        />
       </div>
 
-      <div className="flex-1 overflow-y-auto px-5 pb-3">
+      {/* Day detail */}
+      <div className="flex-1 overflow-y-auto px-5 pt-3 pb-3">
+        <div className="mb-2 flex items-baseline gap-3">
+          <span className="font-mono text-[10px] uppercase tracking-[0.18em] text-ink-3">
+            {format(selectedDay, "EEE, d MMM").toUpperCase()}
+          </span>
+          <div className="h-px flex-1 bg-ink/10" />
+          <span className="font-mono text-[10px] text-ink-3">
+            {dayEntries.length} {dayEntries.length === 1 ? "ENTRY" : "ENTRIES"}
+          </span>
+        </div>
+
         {isLoading ? (
           <p className="text-sm text-ink-3">Loading…</p>
+        ) : dayEntries.length === 0 ? (
+          <p className="font-serif text-[14px] italic text-ink-3">
+            {isTodayFn(selectedDay) ? "Today is still open." : "Nothing written."}
+          </p>
         ) : (
-          <div>
-            {days.map(({ d, key }, i) => {
-              const dayEntries = entriesByDay[key] ?? [];
-              const isToday = i === 0;
+          <div className="space-y-2">
+            {dayEntries.map((e: any) => {
+              const cfg = JOURNALS[e.journal_type as JournalType];
+              if (!cfg) return null;
+              const Icon = cfg.icon;
+              const isOpen = expandedId === e.id;
               return (
-                <div key={key} className={`flex gap-3 border-t border-line ${dayEntries.length === 0 ? "py-1" : "py-2"}`}>
-                  <div className="w-10 shrink-0">
-                    <div
-                      className={`font-display leading-none ${dayEntries.length === 0 ? "text-[14px] text-ink-3" : "text-[18px]"} ${isToday ? "italic" : ""}`}
-                    >
-                      {String(d.getDate()).padStart(2, "0")}
-                    </div>
-                    {dayEntries.length > 0 && (
-                      <div className="mt-0.5 font-mono text-[8px] tracking-[0.12em] text-ink-3">
-                        {format(d, "EEE").toUpperCase()}
-                      </div>
-                    )}
+                <button
+                  key={e.id}
+                  type="button"
+                  onClick={() => setExpandedId(isOpen ? null : e.id)}
+                  className="block w-full rounded border border-line bg-white/60 px-3 py-2.5 text-left"
+                >
+                  <div className="flex items-center gap-2.5">
+                    <Icon
+                      className="h-4 w-4 shrink-0"
+                      style={{ color: `hsl(var(${cfg.accentVar}))` }}
+                      strokeWidth={1.8}
+                    />
+                    <span className="font-serif text-[15px] font-medium">{cfg.title}</span>
+                    <span className="ml-auto font-mono text-[10px] tracking-[0.04em] text-ink-3">
+                      {format(new Date(e.created_at), "HH:mm")}
+                    </span>
                   </div>
-                  <div className="flex-1 pt-0.5">
-                    {dayEntries.length === 0 ? (
-                      <p className="font-serif text-[12px] italic text-ink-3">
-                        {isToday ? "Today is still open." : "—"}
-                      </p>
-                    ) : (
-                      <div className="space-y-1.5">
-                        {dayEntries.map((e: any) => {
-                          const cfg = JOURNALS[e.journal_type as JournalType];
-                          if (!cfg) return null;
-                          const Icon = cfg.icon;
-                          const preview = (e.content ?? "")
-                            .trim()
-                            .replace(/\s+/g, " ")
-                            .slice(0, 36);
-                          return (
-                            <div
-                              key={e.id}
-                              className="flex items-center gap-2.5 rounded border border-line bg-white/50 px-2.5 py-1.5"
-                            >
-                              <Icon
-                                className="h-3.5 w-3.5 shrink-0"
-                                style={{ color: `hsl(var(${cfg.accentVar}))` }}
-                                strokeWidth={1.8}
-                              />
-                              <span className="font-serif text-[14px] font-medium">{cfg.title}</span>
-                              <span className="ml-auto truncate font-mono text-[10px] tracking-[0.04em] text-ink-3">
-                                {preview}
-                              </span>
-                            </div>
-                          );
-                        })}
-                      </div>
-                    )}
-                  </div>
-                </div>
+                  <p
+                    className={`mt-1.5 whitespace-pre-wrap font-serif text-[14px] leading-snug text-ink ${
+                      isOpen ? "" : "line-clamp-2"
+                    }`}
+                  >
+                    {e.content?.trim() || <span className="italic text-ink-3">No content.</span>}
+                  </p>
+                </button>
               );
             })}
           </div>
