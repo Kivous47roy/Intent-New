@@ -1,30 +1,34 @@
-## Extend History detail area to fill viewport
+## Fix History page Day detail panel sizing
 
-**Problem**: On the History page, when an entry is short (e.g. just "Affirmation"), the white entry card ends partway down the screen, leaving a large empty beige area between it and the bottom navigation bar.
+Two small layout adjustments in `src/pages/History.tsx` on the Day detail container (line 136).
 
-**Goal**: The entry detail container should always extend down to just above the bottom nav (TODAY / HISTORY / PROFILE), regardless of content length. Long entries continue to scroll naturally past the viewport.
+### 1. Match horizontal width to calendar + stats blocks
 
-### Change
+The stats strip and calendar use `mx-5` (20px side margin). The Day detail panel currently uses `mx-2 md:mx-5`, which makes it visibly wider than the blocks above on mobile.
 
-In `src/pages/History.tsx`:
+Change its horizontal margin to `mx-5` so all three blocks share the exact same left/right alignment.
 
-- Wrap the page content in a flex column so the day-detail section can grow.
-- Make the outer scroll container `flex flex-col` (it's already `flex-1 overflow-y-auto`).
-- Give the day detail wrapper `flex-1 flex flex-col` so it stretches to fill remaining space.
-- Apply a subtle bordered/white surface to the detail panel so it visually reads as a continuous box down to the bottom nav line — matching the existing `border-line bg-white/40` style used by the calendar/stats blocks.
-- Keep `pb-6` so the last entry isn't flush against the nav.
-- Long content still scrolls because the parent is `overflow-y-auto`.
+### 2. Stretch panel down to just above the bottom nav
 
-### Technical detail
+Currently the panel has `mb-4` plus `safe-bottom` padding, leaving a visible gap between the bottom of the panel and the bottom navigation bar. The user wants the bottom gap to match the gap between the calendar and the stats strip (which is `mt-3` = 12px).
 
+`AppShell` already reserves space for the fixed bottom nav via `pb-20` on `<main>`, so the panel just needs a small consistent bottom margin and no extra `safe-bottom` padding.
+
+Replace:
 ```
-<div className="flex-1 overflow-y-auto flex flex-col">
-  ...header, stats, calendar...
-  <div className="mx-5 mt-3 mb-3 flex-1 flex flex-col rounded border border-line bg-white/40 p-4">
-    <div className="mb-2 flex items-baseline gap-3">...date strip...</div>
-    {entries list or empty state}
-  </div>
-</div>
+mx-2 md:mx-5 mt-3 mb-4 flex-1 min-h-0 flex flex-col rounded border border-line bg-white/40 safe-bottom overflow-hidden
+```
+with:
+```
+mx-5 mt-3 mb-3 flex-1 min-h-0 flex flex-col rounded border border-line bg-white/40 overflow-hidden
 ```
 
-This makes the panel a real bordered box that always reaches just above the bottom nav, matches the visual language of the other cards on the page, and still allows long entries to push past the fold and scroll.
+This:
+- Aligns the panel's left/right edges with the calendar and stats strip (`mx-5`).
+- Uses `mb-3` (12px) — the same spacing used between calendar and panel — so the panel ends a consistent distance above the bottom nav.
+- Removes `safe-bottom` since AppShell's `pb-20` already clears the fixed nav and safe area.
+- `flex-1 min-h-0` continues to make the panel fill all remaining vertical space, and the inner `flex-1 overflow-y-auto` scroll area on line 147 automatically grows with it — no change needed there.
+
+### Files
+
+- `src/pages/History.tsx` — single className change on the Day detail wrapper div (line 136).
