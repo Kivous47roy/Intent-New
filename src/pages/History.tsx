@@ -74,7 +74,7 @@ export default function History() {
   );
 
   return (
-    <div className="flex-1 overflow-y-auto">
+    <div className="flex-1 overflow-y-auto flex flex-col">
       <div className="safe-top" />
 
       <div className="px-5 pt-2">
@@ -127,7 +127,7 @@ export default function History() {
       </div>
 
       {/* Day detail */}
-      <div className="px-5 pt-3 pb-6">
+      <div className="mx-5 mt-3 mb-3 flex-1 flex flex-col rounded border border-line bg-white/40 p-4">
         <div className="mb-2 flex items-baseline gap-3">
           <span className="font-mono text-[10px] uppercase tracking-[0.18em] text-ink-3">
             {format(selectedDay, "EEE, d MMM").toUpperCase()}
