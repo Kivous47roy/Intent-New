@@ -220,11 +220,13 @@ export default function JournalSession() {
         <button
           onClick={handleCta}
           disabled={submitting}
-          className="flex h-10 w-10 items-center justify-center rounded border border-line-strong bg-ink text-paper transition-opacity disabled:opacity-60"
+          className="flex h-10 items-center gap-1.5 rounded border border-line-strong bg-ink px-3 text-paper transition-opacity disabled:opacity-60"
           aria-label={ctaLabel}
-          title={ctaLabel}
         >
-          <Check className="h-4 w-4" strokeWidth={2.2} />
+          <Check className="h-3.5 w-3.5" strokeWidth={2.4} />
+          <span className="font-mono text-[11px] uppercase tracking-[0.1em]">
+            {submitting ? "…" : phase === "sort" ? "Save" : "Save"}
+          </span>
         </button>
       </div>
 
