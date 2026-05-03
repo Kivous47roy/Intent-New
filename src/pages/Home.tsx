@@ -69,47 +69,46 @@ export default function Home() {
       <div className="safe-top" />
 
       {/* Header strip */}
-      <div className="px-6 pt-3">
-        <div className="mb-5 flex items-baseline gap-3">
-          <span className="font-mono text-[11px] uppercase tracking-[0.18em] text-ink-3">INTENT</span>
+      <div className="px-5 pt-2">
+        <div className="mb-2 flex items-baseline gap-3">
+          <span className="font-mono text-[10px] uppercase tracking-[0.18em] text-ink-3">INTENT</span>
           <div className="h-px flex-1 bg-ink/10" />
-          <span className="font-mono text-[11px] uppercase tracking-[0.05em] text-ink-3">
+          <span className="font-mono text-[10px] uppercase tracking-[0.05em] text-ink-3">
             {format(today, "yyyy.MM.dd")}
           </span>
         </div>
 
-        <div className="flex items-end justify-between gap-4">
+        <div className="flex items-end justify-between gap-3">
           <div className="min-w-0">
-            <p className="font-serif text-sm italic text-ink-2">
+            <p className="font-serif text-[12px] italic text-ink-2">
               {greeting(today)}{firstName ? `, ${firstName}` : ""}.
             </p>
-            <h1 className="mt-1 font-display text-[38px] leading-[1.05] text-ink">
-              {format(today, "EEEE")}<span className="text-ink-3">,</span>
-              <br />
+            <h1 className="mt-0.5 font-display text-[24px] leading-[1.05] text-ink">
+              {format(today, "EEEE")}<span className="text-ink-3">,</span>{" "}
               <em className="font-serif not-italic font-normal italic">{format(today, "MMM d")}.</em>
             </h1>
           </div>
 
           {/* Streak coin */}
-          <div className={`flex shrink-0 items-center gap-2 rounded-full border border-ink bg-paper-2 px-3 py-2 ${streak > 0 ? "animate-streak-pop" : ""}`}>
-            <Flame className="h-4 w-4" style={{ color: "hsl(var(--accent))" }} strokeWidth={2} />
-            <span className="font-display text-[22px] leading-none">{streak}</span>
-            <span className="font-mono text-[10px] uppercase tracking-[0.1em] text-ink-2">DAYS</span>
+          <div className={`flex shrink-0 items-center gap-1.5 rounded-full border border-ink bg-paper-2 px-2.5 py-1.5 ${streak > 0 ? "animate-streak-pop" : ""}`}>
+            <Flame className="h-3.5 w-3.5" style={{ color: "hsl(var(--accent))" }} strokeWidth={2} />
+            <span className="font-display text-[16px] leading-none">{streak}</span>
+            <span className="font-mono text-[9px] uppercase tracking-[0.1em] text-ink-2">D</span>
           </div>
         </div>
       </div>
 
       {/* Section header */}
-      <div className="mt-7 flex items-center gap-3 px-6">
-        <span className="font-mono text-[10px] uppercase tracking-[0.18em] text-ink-3">
-          ── TODAY'S RITUALS · {completedToday.size} / {TOTAL_RITUALS}
+      <div className="mt-3 flex items-center gap-3 px-5">
+        <span className="font-mono text-[9px] uppercase tracking-[0.18em] text-ink-3">
+          ── TODAY · {completedToday.size} / {TOTAL_RITUALS}
         </span>
         <div className="h-px flex-1 bg-ink/10" />
       </div>
 
       {/* Cards */}
-      <div className="flex-1 px-6 pb-6 pt-3">
-        <div className="space-y-2.5">
+      <div className="flex-1 px-5 pb-3 pt-2">
+        <div className="space-y-1.5">
           {JOURNAL_LIST.map((j) => {
             const Icon = j.icon;
             const done = completedToday.has(j.id);
@@ -118,7 +117,7 @@ export default function Home() {
               <Link
                 key={j.id}
                 to={`/journal/${j.id}`}
-                className={`relative block overflow-hidden rounded border p-4 transition-transform active:scale-[0.99] ${
+                className={`relative block overflow-hidden rounded border px-3 py-2.5 transition-transform active:scale-[0.99] ${
                   done ? "border-line bg-paper-2 opacity-70" : "border-line-strong bg-card-paper"
                 }`}
               >
@@ -127,37 +126,32 @@ export default function Home() {
                   className={`pointer-events-none absolute inset-0 opacity-50 pat-${j.pattern}`}
                   aria-hidden
                 />
-                <div className="relative flex items-center gap-4">
+                <div className="relative flex items-center gap-3">
                   <div
-                    className="flex h-11 w-11 shrink-0 items-center justify-center rounded border border-ink bg-paper"
+                    className="flex h-9 w-9 shrink-0 items-center justify-center rounded border border-ink bg-paper"
                     style={{ color: accent }}
                   >
-                    <Icon className="h-5 w-5" strokeWidth={1.6} />
+                    <Icon className="h-4 w-4" strokeWidth={1.6} />
                   </div>
 
                   <div className="min-w-0 flex-1">
                     <div className="flex items-baseline gap-2">
-                      <h3 className="font-serif text-[17px] font-medium leading-tight text-ink">
+                      <h3 className="font-serif text-[15px] font-medium leading-tight text-ink truncate">
                         {j.title}
                       </h3>
-                      <span className="font-mono text-[10px] tracking-[0.1em] text-ink-3">{j.number}</span>
+                      <span className="font-mono text-[9px] tracking-[0.1em] text-ink-3">{j.number}</span>
                     </div>
-                    <p className="mt-0.5 text-[13px] leading-snug text-ink-2">{j.blurb}</p>
-                    {j.timeOfDay !== "anytime" && (
-                      <p className="mt-1 font-mono text-[9px] uppercase tracking-[0.18em] text-ink-3">
-                        {j.timeOfDay === "morning" ? "MORNING" : "NIGHT"}
-                      </p>
-                    )}
+                    <p className="mt-0.5 text-[11px] leading-snug text-ink-2 line-clamp-1">{j.blurb}</p>
                   </div>
 
                   <div className="shrink-0">
                     {done ? (
-                      <div className="flex h-7 w-7 items-center justify-center rounded-full bg-ink text-paper">
-                        <Check className="h-3.5 w-3.5" strokeWidth={2.4} />
+                      <div className="flex h-6 w-6 items-center justify-center rounded-full bg-ink text-paper">
+                        <Check className="h-3 w-3" strokeWidth={2.4} />
                       </div>
                     ) : (
-                      <span className="rounded-full border border-line-strong px-2.5 py-1 font-mono text-[10px] tracking-[0.05em] text-ink-2">
-                        {j.durationMinutes} MIN
+                      <span className="rounded-full border border-line-strong px-2 py-0.5 font-mono text-[9px] tracking-[0.05em] text-ink-2">
+                        {j.durationMinutes}M
                       </span>
                     )}
                   </div>
@@ -165,16 +159,6 @@ export default function Home() {
               </Link>
             );
           })}
-        </div>
-
-        {/* Footer quote */}
-        <div className="mt-7 border-t border-line pt-5">
-          <p className="font-serif text-[15px] italic leading-[1.45] text-ink-2">
-            "The faintest ink is more durable than the strongest memory."
-          </p>
-          <p className="mt-2 font-mono text-[10px] uppercase tracking-[0.1em] text-ink-3">
-            — CHINESE PROVERB
-          </p>
         </div>
       </div>
     </div>
