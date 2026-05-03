@@ -150,7 +150,7 @@ export default function History() {
               {isTodayFn(selectedDay) ? "Today is still open." : "Nothing written."}
             </p>
           ) : (
-            <div className="space-y-2">
+            <div className={`space-y-2 ${dayEntries.length === 1 ? "flex flex-col h-full" : ""}`}>
               {dayEntries.map((e: any) => {
                 const cfg = JOURNALS[e.journal_type as JournalType];
                 if (!cfg) return null;
