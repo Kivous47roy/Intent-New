@@ -374,7 +374,7 @@ export default function JournalSession() {
 
       {/* Footer */}
       <div className="fixed bottom-0 left-0 right-0 z-20 bg-gradient-to-t from-paper via-paper to-transparent pt-6">
-        <div className="mx-auto max-w-md px-6 pb-7">
+        <div className="mx-auto max-w-md px-6 pb-7 safe-bottom">
           <div className="mb-2.5 flex items-center gap-3">
             <span className="font-mono text-[10px] tracking-[0.12em] text-ink-3">{meta}</span>
             <div className="h-px flex-1 bg-ink/10" />
