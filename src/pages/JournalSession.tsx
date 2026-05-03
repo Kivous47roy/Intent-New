@@ -217,7 +217,15 @@ export default function JournalSession() {
           </button>
         </div>
 
-        <div className="h-10 w-10" />
+        <button
+          onClick={handleCta}
+          disabled={submitting}
+          className="flex h-10 w-10 items-center justify-center rounded border border-line-strong bg-ink text-paper transition-opacity disabled:opacity-60"
+          aria-label={ctaLabel}
+          title={ctaLabel}
+        >
+          <Check className="h-4 w-4" strokeWidth={2.2} />
+        </button>
       </div>
 
       {/* Progress bar */}
