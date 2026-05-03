@@ -74,7 +74,7 @@ export default function History() {
   );
 
   return (
-    <div className="flex flex-1 flex-col">
+    <div className="flex flex-1 flex-col min-h-0">
       <div className="safe-top" />
 
       <div className="px-5 pt-2">
@@ -114,20 +114,20 @@ export default function History() {
           modifiers={{ written: writtenDates }}
           modifiersClassNames={{
             written:
-              "relative font-semibold text-primary underline underline-offset-[6px] decoration-2 decoration-primary",
+              "relative font-semibold text-primary underline underline-offset-[6px] decoration-2 decoration-primary aria-selected:text-primary-foreground aria-selected:no-underline",
           }}
           classNames={{
             day_today:
               "ring-2 ring-primary ring-offset-1 ring-offset-background rounded-full font-bold text-ink",
             day_selected:
-              "bg-primary text-primary-foreground hover:bg-primary hover:text-primary-foreground rounded-full",
+              "bg-primary !text-primary-foreground hover:bg-primary hover:!text-primary-foreground rounded-full !no-underline",
           }}
           className="p-2 pointer-events-auto mx-auto"
         />
       </div>
 
       {/* Day detail */}
-      <div className="flex-1 overflow-y-auto px-5 pt-3 pb-3">
+      <div className="flex-1 min-h-0 overflow-y-auto px-5 pt-3 pb-3">
         <div className="mb-2 flex items-baseline gap-3">
           <span className="font-mono text-[10px] uppercase tracking-[0.18em] text-ink-3">
             {format(selectedDay, "EEE, d MMM").toUpperCase()}
