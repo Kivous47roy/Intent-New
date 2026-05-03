@@ -113,18 +113,20 @@ export default function History() {
           modifiers={{ written: writtenDates }}
           modifiersClassNames={{
             written:
-              "relative font-semibold text-primary underline underline-offset-[6px] decoration-2 decoration-primary aria-selected:text-primary-foreground aria-selected:no-underline",
+              "relative font-semibold text-primary underline underline-offset-[4px] decoration-2 decoration-primary aria-selected:text-primary-foreground aria-selected:no-underline",
           }}
           classNames={{
             day_today:
               "ring-2 ring-primary ring-offset-1 ring-offset-background rounded-full font-bold text-ink",
             day_selected:
               "bg-primary !text-primary-foreground hover:bg-primary hover:!text-primary-foreground rounded-full !no-underline",
-            month: "space-y-2",
-            row: "flex w-full mt-1",
-            head_cell: "text-muted-foreground rounded-md w-9 font-normal text-[0.7rem]",
-            cell: "h-8 w-9 text-center text-sm p-0 relative",
-            day: "h-8 w-9 p-0 font-normal aria-selected:opacity-100",
+            month: "space-y-1",
+            row: "flex w-full mt-0.5",
+            head_cell: "text-muted-foreground rounded-md w-8 font-normal text-[0.65rem]",
+            cell: "h-7 w-8 text-center text-xs p-0 relative",
+            day: "h-7 w-8 p-0 font-normal text-xs aria-selected:opacity-100",
+            caption_label: "text-xs font-medium",
+            nav_button: "h-6 w-6 bg-transparent p-0 opacity-50 hover:opacity-100 inline-flex items-center justify-center rounded-md border border-input",
           }}
           className="p-2 pointer-events-auto mx-auto"
         />
