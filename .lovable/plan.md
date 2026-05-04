@@ -1,34 +1,39 @@
-## Fix History page Day detail panel sizing
+## Make History entries reach the bottom nav line
 
-Two small layout adjustments in `src/pages/History.tsx` on the Day detail container (line 136).
+### Root cause
 
-### 1. Match horizontal width to calendar + stats blocks
+The entries panel can't reach the line above the bottom nav because of two stacked gaps:
 
-The stats strip and calendar use `mx-5` (20px side margin). The Day detail panel currently uses `mx-2 md:mx-5`, which makes it visibly wider than the blocks above on mobile.
+1. `AppShell` reserves a fixed `pb-20` (80px) on `<main>` to clear the `fixed` bottom nav — but the nav itself is only ~56–64px tall, leaving ~16–24px of dead space below the panel.
+2. The panel adds another `mb-3` (12px) on top of that.
 
-Change its horizontal margin to `mx-5` so all three blocks share the exact same left/right alignment.
+So even with `flex-1`, the panel stops well above the nav's top border.
 
-### 2. Stretch panel down to just above the bottom nav
+### Fix
 
-Currently the panel has `mb-4` plus `safe-bottom` padding, leaving a visible gap between the bottom of the panel and the bottom navigation bar. The user wants the bottom gap to match the gap between the calendar and the stats strip (which is `mt-3` = 12px).
+Switch the bottom nav from `fixed` to a normal flex child of `AppShell`. Then `<main>` no longer needs reserved padding, and `flex-1` on the entries panel naturally stretches all the way down to the nav's top border line.
 
-`AppShell` already reserves space for the fixed bottom nav via `pb-20` on `<main>`, so the panel just needs a small consistent bottom margin and no extra `safe-bottom` padding.
-
-Replace:
-```
-mx-2 md:mx-5 mt-3 mb-4 flex-1 min-h-0 flex flex-col rounded border border-line bg-white/40 safe-bottom overflow-hidden
-```
-with:
-```
-mx-5 mt-3 mb-3 flex-1 min-h-0 flex flex-col rounded border border-line bg-white/40 overflow-hidden
+**1. `src/components/AppShell.tsx`** — drop the `pb-20` reservation since the nav is in normal flow now:
+```tsx
+<main className={hideNav ? "..." : "flex flex-1 min-h-0 flex-col overflow-hidden"}>
 ```
 
-This:
-- Aligns the panel's left/right edges with the calendar and stats strip (`mx-5`).
-- Uses `mb-3` (12px) — the same spacing used between calendar and panel — so the panel ends a consistent distance above the bottom nav.
-- Removes `safe-bottom` since AppShell's `pb-20` already clears the fixed nav and safe area.
-- `flex-1 min-h-0` continues to make the panel fill all remaining vertical space, and the inner `flex-1 overflow-y-auto` scroll area on line 147 automatically grows with it — no change needed there.
+**2. `src/components/BottomNav.tsx`** — remove `fixed bottom-0 left-0 right-0`; keep border, background, and `safe-bottom`. It becomes a sibling that sits at the bottom of the flex column automatically:
+```tsx
+<nav className="z-40 border-t border-line-strong bg-paper/90 backdrop-blur-sm safe-bottom">
+```
+
+**3. `src/pages/History.tsx`** — change the entries panel margin from `mb-3` to `mb-0` so its bottom border sits flush against the nav's top border (matches the "horizontal line right above the bottom menu" the user described). Keep `mx-5` and `mt-3` as-is.
+
+### Result
+
+- Entries panel grows to fill all space between the calendar and the nav's top border — no dead gap.
+- Significantly more entries visible without scrolling, and scrolled text reaches the nav line before being clipped.
+- Nav stays pinned to the bottom (it's the last child in a full-height flex column), with safe-area inset preserved for iOS.
+- No layout impact on other pages — `AppShell` already wraps every screen the same way.
 
 ### Files
 
-- `src/pages/History.tsx` — single className change on the Day detail wrapper div (line 136).
+- `src/components/AppShell.tsx`
+- `src/components/BottomNav.tsx`
+- `src/pages/History.tsx`
