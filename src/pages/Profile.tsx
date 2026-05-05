@@ -1,12 +1,21 @@
 import { useEffect, useMemo, useState } from "react";
-import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useAuth } from "@/hooks/useAuth";
 import { useProfile } from "@/hooks/useProfile";
 import { supabase } from "@/integrations/supabase/client";
 import { JOURNALS, type JournalType } from "@/lib/journals";
-import { Bell, Moon, LogOut, Flame } from "lucide-react";
+import { Bell, Moon, LogOut, Flame, Plus, X } from "lucide-react";
 import { toast } from "sonner";
 import { format } from "date-fns";
+
+const ACCENT_CYCLE = [
+  "--j-brain",
+  "--j-gratitude",
+  "--j-expressive",
+  "--j-intention",
+  "--j-retrieval",
+  "--j-affirmation",
+];
 
 export default function Profile() {
   const { user, signOut } = useAuth();
@@ -18,6 +27,52 @@ export default function Profile() {
   const [evening, setEvening] = useState("21:00");
   const [morningOn, setMorningOn] = useState(true);
   const [eveningOn, setEveningOn] = useState(true);
+
+  // Everyday Goals
+  const [addingGoal, setAddingGoal] = useState(false);
+  const [newEmoji, setNewEmoji] = useState("✦");
+  const [newTitle, setNewTitle] = useState("");
+
+  const { data: habits = [] } = useQuery({
+    queryKey: ["habits", user?.id],
+    enabled: !!user,
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("habits")
+        .select("*")
+        .eq("user_id", user!.id)
+        .order("position");
+      if (error) throw error;
+      return data ?? [];
+    },
+  });
+
+  const addGoalMutation = useMutation({
+    mutationFn: async () => {
+      const { error } = await supabase.from("habits").insert({
+        user_id: user!.id,
+        title: newTitle.trim(),
+        emoji: newEmoji || "✦",
+        accent_var: ACCENT_CYCLE[(habits as any[]).length % ACCENT_CYCLE.length],
+        position: (habits as any[]).length,
+      });
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["habits"] });
+      setNewTitle("");
+      setNewEmoji("✦");
+      setAddingGoal(false);
+    },
+    onError: (err: any) => toast.error(err.message ?? "Could not add goal"),
+  });
+
+  const deleteGoalMutation = useMutation({
+    mutationFn: async (id: string) => {
+      await supabase.from("habits").delete().eq("id", id).eq("user_id", user!.id);
+    },
+    onSuccess: () => qc.invalidateQueries({ queryKey: ["habits"] }),
+  });
 
   useEffect(() => {
     if (profile) {
@@ -135,6 +190,81 @@ export default function Profile() {
       </div>
 
       <div className="flex-1 overflow-y-auto px-5 pb-3 pt-3">
+        {/* Everyday Goals */}
+        <p className="mb-1.5 font-mono text-[9px] tracking-[0.12em] text-ink-3">── EVERYDAY GOALS</p>
+        <div className="mb-4 space-y-2">
+          {(habits as any[]).map((h, i) => (
+            <div
+              key={h.id}
+              className="flex items-center gap-3 rounded border border-line-strong bg-card-paper px-3.5 py-2.5"
+            >
+              <div
+                className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full border text-[13px]"
+                style={{ borderColor: `hsl(var(${h.accent_var || "--j-brain"}))` }}
+              >
+                {h.emoji}
+              </div>
+              <span className="flex-1 font-serif text-[14px] text-ink">{h.title}</span>
+              <button
+                onClick={() => deleteGoalMutation.mutate(h.id)}
+                className="shrink-0 text-ink-3 hover:text-ink-2 transition-colors"
+              >
+                <X className="h-3.5 w-3.5" />
+              </button>
+            </div>
+          ))}
+
+          {addingGoal ? (
+            <div className="rounded border border-line-strong bg-card-paper px-3.5 py-3 space-y-2">
+              <div className="flex gap-2">
+                <input
+                  type="text"
+                  value={newEmoji}
+                  onChange={(e) => setNewEmoji(e.target.value)}
+                  className="w-12 rounded border border-line bg-paper px-2 py-1.5 text-center font-serif text-[15px] outline-none focus:border-ink"
+                  placeholder="✦"
+                  maxLength={2}
+                />
+                <input
+                  autoFocus
+                  type="text"
+                  value={newTitle}
+                  onChange={(e) => setNewTitle(e.target.value)}
+                  placeholder="Goal name"
+                  className="flex-1 rounded border border-line bg-paper px-2.5 py-1.5 font-serif text-[15px] outline-none placeholder:text-ink-3 focus:border-ink"
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter" && newTitle.trim()) addGoalMutation.mutate();
+                    if (e.key === "Escape") { setAddingGoal(false); setNewTitle(""); }
+                  }}
+                />
+              </div>
+              <div className="flex gap-2">
+                <button
+                  onClick={() => { if (newTitle.trim()) addGoalMutation.mutate(); }}
+                  disabled={!newTitle.trim() || addGoalMutation.isPending}
+                  className="flex-1 rounded border border-ink bg-ink py-1.5 font-mono text-[10px] uppercase tracking-[0.12em] text-paper disabled:opacity-40"
+                >
+                  Add
+                </button>
+                <button
+                  onClick={() => { setAddingGoal(false); setNewTitle(""); }}
+                  className="flex-1 rounded border border-line py-1.5 font-mono text-[10px] uppercase tracking-[0.12em] text-ink-2"
+                >
+                  Cancel
+                </button>
+              </div>
+            </div>
+          ) : (
+            <button
+              onClick={() => setAddingGoal(true)}
+              className="flex w-full items-center gap-2 rounded border border-dashed border-line px-3.5 py-2.5 text-ink-3 hover:text-ink-2 transition-colors"
+            >
+              <Plus className="h-4 w-4" />
+              <span className="font-mono text-[10px] uppercase tracking-[0.12em]">Add everyday goal</span>
+            </button>
+          )}
+        </div>
+
         <p className="mb-1.5 font-mono text-[9px] tracking-[0.12em] text-ink-3">── PRACTICE</p>
         <div className="mb-4 overflow-hidden rounded border border-line-strong bg-white/40">
           {[

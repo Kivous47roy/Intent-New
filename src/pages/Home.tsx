@@ -1,6 +1,6 @@
-import { useMemo, useState } from "react";
+import { useMemo, useState, useEffect } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { format } from "date-fns";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
@@ -32,12 +32,20 @@ function greeting(d: Date) {
 }
 
 export default function Home() {
-  const { user } = useAuth();
-  const { data: profile } = useProfile();
+  const { user, loading: authLoading } = useAuth();
+  const { data: profile, isLoading: profileLoading } = useProfile();
   const queryClient = useQueryClient();
+  const navigate = useNavigate();
   const today = new Date();
   const todayKey = today.toISOString().slice(0, 10);
   const [habitsOpen, setHabitsOpen] = useState(false);
+
+  // Redirect new users to onboarding
+  useEffect(() => {
+    if (!authLoading && !profileLoading && profile != null && !profile.onboarding_completed) {
+      navigate("/onboarding", { replace: true });
+    }
+  }, [authLoading, profile, profileLoading, navigate]);
 
   const { data: completionDates = [] } = useQuery({
     queryKey: ["streak", user?.id],
@@ -154,7 +162,7 @@ export default function Home() {
       {/* Section header */}
       <div className="mt-3 flex items-center gap-3 px-5">
         <span className="font-mono text-[9px] uppercase tracking-[0.18em] text-ink-3">
-          ── TODAY · {completedToday.size} / {TOTAL_RITUALS}
+          ── SIX SHORT RITUALS · {completedToday.size} / {TOTAL_RITUALS}
         </span>
         <div className="h-px flex-1 bg-ink/10" />
       </div>
@@ -162,7 +170,7 @@ export default function Home() {
       {/* Cards */}
       <div className="flex flex-1 flex-col px-5 pb-4 pt-2 gap-2">
 
-        {/* Habits tile */}
+        {/* Everyday Goals tile */}
         <div className="overflow-hidden rounded border border-line-strong bg-card-paper">
           <button
             className="relative flex w-full items-center gap-3 px-3.5 py-3 text-left"
@@ -175,11 +183,11 @@ export default function Home() {
               <Repeat2 className="h-4 w-4" strokeWidth={1.6} />
             </div>
             <div className="min-w-0 flex-1">
-              <div className="flex items-baseline gap-2">
-                <h3 className="font-serif text-[16px] font-medium leading-tight text-ink">Habits</h3>
-              </div>
+              <h3 className="font-serif text-[16px] font-medium leading-tight text-ink">
+                Everyday Goals
+              </h3>
               <p className="mt-0.5 text-[11.5px] leading-snug text-ink-2">
-                {doneHabits.size} of {habits.length} kept · tap to mark
+                {doneHabits.size} of {(habits as any[]).length} kept · tap to mark
               </p>
             </div>
             <ChevronRight
@@ -190,9 +198,9 @@ export default function Home() {
 
           {habitsOpen && (
             <div className="border-t border-line px-3.5 pb-3 pt-2">
-              {habits.length === 0 ? (
+              {(habits as any[]).length === 0 ? (
                 <p className="py-1 font-serif text-[13px] italic text-ink-3">
-                  No habits yet. Open full check-in to add.
+                  No everyday goals yet. Add them in Profile.
                 </p>
               ) : (
                 <div className="space-y-2">
@@ -211,9 +219,7 @@ export default function Home() {
                         >
                           {done && <Check className="h-3 w-3 text-paper" strokeWidth={2.4} />}
                         </div>
-                        <span
-                          className={`font-serif text-[14px] text-left ${done ? "line-through text-ink-3" : "text-ink"}`}
-                        >
+                        <span className={`font-serif text-[14px] text-left ${done ? "line-through text-ink-3" : "text-ink"}`}>
                           {h.emoji} {h.title}
                         </span>
                       </button>
@@ -245,7 +251,6 @@ export default function Home() {
                   done ? "border-line bg-paper-2 opacity-70" : "border-line-strong bg-card-paper"
                 }`}
               >
-                {/* Pattern background */}
                 <div
                   className={`pointer-events-none absolute inset-0 opacity-50 pat-${j.pattern}`}
                   aria-hidden
@@ -257,7 +262,6 @@ export default function Home() {
                   >
                     <Icon className="h-4 w-4" strokeWidth={1.6} />
                   </div>
-
                   <div className="min-w-0 flex-1">
                     <div className="flex items-baseline gap-2">
                       <h3 className="font-serif text-[16px] font-medium leading-tight text-ink truncate">
@@ -267,7 +271,6 @@ export default function Home() {
                     </div>
                     <p className="mt-0.5 text-[11.5px] leading-snug text-ink-2 line-clamp-1">{j.blurb}</p>
                   </div>
-
                   <div className="shrink-0">
                     {done ? (
                       <div className="flex h-6 w-6 items-center justify-center rounded-full bg-ink text-paper">

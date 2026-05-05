@@ -79,7 +79,7 @@ export default function History() {
 
       <div className="px-5 pt-2">
         <h1 className="font-display text-[24px] leading-[1.05]">
-          Your <em className="font-serif not-italic font-normal italic">diary</em>.
+          Your <em className="font-serif not-italic font-normal italic">journal</em>.
         </h1>
       </div>
 

@@ -10,6 +10,7 @@ import History from "./pages/History";
 import HabitLog from "./pages/HabitLog";
 import HabitsCheckin from "./pages/HabitsCheckin";
 import Profile from "./pages/Profile";
+import Onboarding from "./pages/Onboarding";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -27,8 +28,8 @@ const App = () => (
             <Route path="/habits" element={<AppShell hideNav><HabitsCheckin /></AppShell>} />
             <Route path="/history" element={<AppShell><History /></AppShell>} />
             <Route path="/profile" element={<AppShell><Profile /></AppShell>} />
+            <Route path="/onboarding" element={<Onboarding />} />
             <Route path="/auth" element={<Navigate to="/" replace />} />
-            <Route path="/onboarding" element={<Navigate to="/" replace />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
         </AuthProvider>

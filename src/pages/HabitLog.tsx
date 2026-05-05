@@ -51,7 +51,7 @@ export default function HabitLog() {
       <div className="px-5 pt-2">
         <div className="mb-2 flex items-baseline gap-3">
           <span className="font-mono text-[10px] uppercase tracking-[0.18em] text-ink-3">
-            HABITS · LOG
+            EVERYDAY GOALS · LOG
           </span>
           <div className="h-px flex-1 bg-ink/10" />
           <span className="font-mono text-[10px] uppercase tracking-[0.05em] text-ink-3">
@@ -64,28 +64,10 @@ export default function HabitLog() {
         </h1>
       </div>
 
-      {/* Day markers */}
-      <div className="mt-3 px-5">
-        <div
-          className="grid gap-1"
-          style={{ gridTemplateColumns: "repeat(28, 1fr)" }}
-        >
-          {days.map((d, i) => (
-            <div key={d} className="flex flex-col items-center">
-              {(i === 0 || i === 6 || i === 13 || i === 20 || i === 27) && (
-                <span className="font-mono text-[7px] text-ink-3 leading-none mb-0.5">
-                  {format(new Date(d + "T00:00:00"), "d")}
-                </span>
-              )}
-            </div>
-          ))}
-        </div>
-      </div>
-
-      <div className="flex-1 px-5 pt-3 pb-8 space-y-6">
+      <div className="flex-1 px-5 pt-4 pb-8 space-y-6">
         {(habits as any[]).length === 0 ? (
           <p className="font-serif text-[14px] italic text-ink-3 py-4">
-            No habits yet. Add them from Today's habits tile.
+            No everyday goals yet. Add them in Profile.
           </p>
         ) : (
           (habits as any[]).map((h) => {
@@ -113,20 +95,12 @@ export default function HabitLog() {
                     return (
                       <div
                         key={d}
-                        title={d}
+                        title={format(new Date(d + "T00:00:00"), "MMM d")}
                         className="aspect-square rounded-sm border"
                         style={
                           filled
-                            ? {
-                                background: accent,
-                                borderColor: accent,
-                                opacity: 0.85,
-                              }
-                            : {
-                                background: "transparent",
-                                borderColor: "hsl(var(--ink)/0.10)",
-                                opacity: 0.4,
-                              }
+                            ? { background: accent, borderColor: accent, opacity: 0.85 }
+                            : { background: "transparent", borderColor: "hsl(var(--ink) / 0.10)", opacity: 0.4 }
                         }
                       />
                     );
