@@ -1,12 +1,9 @@
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Route, Routes } from "react-router-dom";
+import { BrowserRouter, Route, Routes, Navigate } from "react-router-dom";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { AuthProvider } from "@/hooks/useAuth";
-import { RequireAuth } from "@/components/RequireAuth";
 import { AppShell } from "@/components/AppShell";
-import Auth from "./pages/Auth";
-import Onboarding from "./pages/Onboarding";
 import Home from "./pages/Home";
 import JournalSession from "./pages/JournalSession";
 import History from "./pages/History";
@@ -22,57 +19,12 @@ const App = () => (
       <BrowserRouter>
         <AuthProvider>
           <Routes>
-            <Route path="/auth" element={<Auth />} />
-            <Route
-              path="/onboarding"
-              element={
-                <RequireAuth>
-                  <AppShell hideNav>
-                    <Onboarding />
-                  </AppShell>
-                </RequireAuth>
-              }
-            />
-            <Route
-              path="/"
-              element={
-                <RequireAuth>
-                  <AppShell>
-                    <Home />
-                  </AppShell>
-                </RequireAuth>
-              }
-            />
-            <Route
-              path="/journal/:type"
-              element={
-                <RequireAuth>
-                  <AppShell hideNav>
-                    <JournalSession />
-                  </AppShell>
-                </RequireAuth>
-              }
-            />
-            <Route
-              path="/history"
-              element={
-                <RequireAuth>
-                  <AppShell>
-                    <History />
-                  </AppShell>
-                </RequireAuth>
-              }
-            />
-            <Route
-              path="/profile"
-              element={
-                <RequireAuth>
-                  <AppShell>
-                    <Profile />
-                  </AppShell>
-                </RequireAuth>
-              }
-            />
+            <Route path="/" element={<AppShell><Home /></AppShell>} />
+            <Route path="/journal/:type" element={<AppShell hideNav><JournalSession /></AppShell>} />
+            <Route path="/history" element={<AppShell><History /></AppShell>} />
+            <Route path="/profile" element={<AppShell><Profile /></AppShell>} />
+            <Route path="/auth" element={<Navigate to="/" replace />} />
+            <Route path="/onboarding" element={<Navigate to="/" replace />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
         </AuthProvider>

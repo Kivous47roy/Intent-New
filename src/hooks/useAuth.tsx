@@ -22,11 +22,22 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       setUser(sess?.user ?? null);
     });
 
-    supabase.auth.getSession().then(({ data: { session: sess } }) => {
-      setSession(sess);
-      setUser(sess?.user ?? null);
-      setLoading(false);
-    });
+    supabase.auth.getSession()
+      .then(async ({ data: { session: sess } }) => {
+        if (sess) {
+          setSession(sess);
+          setUser(sess.user);
+        } else {
+          // No existing session — sign in anonymously so the app works without login
+          const { data } = await supabase.auth.signInAnonymously();
+          if (data.session) {
+            setSession(data.session);
+            setUser(data.session.user);
+          }
+        }
+      })
+      .catch(() => {})
+      .finally(() => setLoading(false));
 
     return () => sub.subscription.unsubscribe();
   }, []);
