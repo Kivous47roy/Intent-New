@@ -1,5 +1,5 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
 import { format } from "date-fns";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
@@ -17,10 +17,7 @@ export default function HabitsCheckin() {
     enabled: !!user,
     queryFn: async () => {
       const { data, error } = await supabase
-        .from("habits")
-        .select("*")
-        .eq("user_id", user!.id)
-        .order("position");
+        .from("habits").select("*").eq("user_id", user!.id).order("position");
       if (error) throw error;
       return data ?? [];
     },
@@ -31,29 +28,25 @@ export default function HabitsCheckin() {
     enabled: !!user,
     queryFn: async () => {
       const { data, error } = await supabase
-        .from("habit_logs")
-        .select("habit_id")
-        .eq("user_id", user!.id)
-        .eq("logged_date", todayKey);
+        .from("habit_logs").select("habit_id")
+        .eq("user_id", user!.id).eq("logged_date", todayKey);
       if (error) throw error;
       return data ?? [];
     },
   });
 
   const doneSet = new Set((todayLogs as any[]).map((l) => l.habit_id));
+  const total = (habits as any[]).length;
+  const count = doneSet.size;
 
   const toggleMutation = useMutation({
     mutationFn: async (habitId: string) => {
       if (doneSet.has(habitId)) {
         await supabase.from("habit_logs").delete()
-          .eq("user_id", user!.id)
-          .eq("habit_id", habitId)
-          .eq("logged_date", todayKey);
+          .eq("user_id", user!.id).eq("habit_id", habitId).eq("logged_date", todayKey);
       } else {
         await supabase.from("habit_logs").insert({
-          user_id: user!.id,
-          habit_id: habitId,
-          logged_date: todayKey,
+          user_id: user!.id, habit_id: habitId, logged_date: todayKey,
         });
       }
     },
@@ -78,24 +71,40 @@ export default function HabitsCheckin() {
             <span className="font-mono text-[10px] uppercase tracking-[0.14em]">Back</span>
           </button>
           <div className="h-px flex-1 bg-ink/10" />
-          <span className="font-mono text-[10px] uppercase tracking-[0.05em] text-ink-3">
+          <Link
+            to="/habit-log"
+            className="font-mono text-[11px] tracking-[0.12em] text-ink-2 underline underline-offset-2"
+          >
+            LOG ↗
+          </Link>
+        </div>
+        <div className="mb-1 flex items-baseline gap-3">
+          <span className="font-mono text-[10px] uppercase tracking-[0.18em] text-ink-3">
+            EVERYDAY GOALS · TONIGHT
+          </span>
+          <div className="h-px flex-1 bg-ink/10" />
+          <span className="font-mono text-[10px] text-ink-3">
             {format(today, "yyyy.MM.dd")}
           </span>
         </div>
-        <h1 className="font-display text-[24px] leading-[1.05] text-ink">
-          Tonight's <em className="font-serif not-italic font-normal italic">goals</em>.
+        <h1 className="font-display text-[28px] leading-[1.05] text-ink">
+          What did today<br />
+          <em className="font-serif not-italic font-normal italic">actually</em> hold?
         </h1>
+
+        {/* Progress bar */}
+        {total > 0 && (
+          <div className="mt-4 h-[3px] rounded-full bg-line overflow-hidden">
+            <div
+              className="h-full bg-ink transition-all duration-300"
+              style={{ width: `${(count / total) * 100}%` }}
+            />
+          </div>
+        )}
       </div>
 
-      <div className="mt-3 flex items-center gap-3 px-5">
-        <span className="font-mono text-[9px] uppercase tracking-[0.18em] text-ink-3">
-          ── EVERYDAY GOALS · {doneSet.size} / {(habits as any[]).length} done
-        </span>
-        <div className="h-px flex-1 bg-ink/10" />
-      </div>
-
-      <div className="flex-1 overflow-y-auto px-5 pt-2 pb-8 space-y-2">
-        {(habits as any[]).length === 0 ? (
+      <div className="flex-1 overflow-y-auto px-5 pt-4 pb-8 space-y-2.5">
+        {total === 0 ? (
           <p className="py-6 font-serif text-[14px] italic text-ink-3">
             No everyday goals yet. Add them in your Profile.
           </p>
@@ -107,33 +116,42 @@ export default function HabitsCheckin() {
               <button
                 key={h.id}
                 onClick={() => toggleMutation.mutate(h.id)}
-                className={`flex w-full items-center gap-3 rounded border px-3.5 py-3 text-left transition-colors ${
-                  done
-                    ? "border-line bg-paper-2 opacity-75"
-                    : "border-line-strong bg-card-paper"
+                className={`flex w-full items-center gap-3.5 rounded border px-4 py-3.5 text-left transition-colors ${
+                  done ? "border-ink bg-paper-2" : "border-line-strong bg-card-paper"
                 }`}
               >
                 <div
-                  className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full border transition-colors"
+                  className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full border-[1.5px] transition-colors"
                   style={
                     done
-                      ? { background: accent, borderColor: accent }
-                      : { borderColor: accent }
+                      ? { background: "hsl(var(--ink))", borderColor: "hsl(var(--ink))" }
+                      : { borderColor: "hsl(var(--line-strong))" }
                   }
                 >
-                  {done && (
-                    <Check className="h-3.5 w-3.5 text-paper" strokeWidth={2.4} />
-                  )}
+                  {done && <Check className="h-3.5 w-3.5 text-paper" strokeWidth={2.6} />}
                 </div>
+                <span className="text-[20px]">{h.emoji}</span>
                 <span
-                  className="font-serif text-[15px]"
-                  style={done ? { textDecoration: "line-through", opacity: 0.6 } : {}}
+                  className="flex-1 font-serif text-[17px] font-medium"
+                  style={
+                    done
+                      ? { textDecoration: "line-through", color: "hsl(var(--ink-3))" }
+                      : { color: "hsl(var(--ink))" }
+                  }
                 >
-                  {h.emoji} {h.title}
+                  {h.title}
                 </span>
               </button>
             );
           })
+        )}
+
+        {count === total && total > 0 && (
+          <div className="mt-2 rounded border border-ink bg-paper-2 px-4 py-3.5">
+            <p className="font-serif text-[14px] italic leading-[1.5]">
+              All {total}, today. A small day, well kept.
+            </p>
+          </div>
         )}
       </div>
     </div>

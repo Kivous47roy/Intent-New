@@ -287,6 +287,14 @@ export default function Home() {
             );
           })}
         </div>
+
+        {/* Quote */}
+        <div className="mt-2 border-t border-line pt-4 pb-2">
+          <p className="font-serif text-[15px] italic leading-[1.45] text-ink-2">
+            &ldquo;The faintest ink is more durable than the strongest memory.&rdquo;
+          </p>
+          <p className="mt-2 font-mono text-[10px] tracking-[0.1em] text-ink-3">— CHINESE PROVERB</p>
+        </div>
       </div>
     </div>
   );

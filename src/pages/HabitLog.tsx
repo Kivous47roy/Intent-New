@@ -1,7 +1,24 @@
 import { useQuery } from "@tanstack/react-query";
-import { subDays, format } from "date-fns";
+import { subDays } from "date-fns";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
+import { Flame } from "lucide-react";
+
+function calcCurrentStreak(row: number[]) {
+  let cur = 0;
+  for (let i = row.length - 1; i >= 0; i--) {
+    if (row[i] === 1) cur++; else break;
+  }
+  return cur;
+}
+
+function calcBestStreak(row: number[]) {
+  let best = 0, run = 0;
+  for (const v of row) {
+    if (v === 1) { run++; best = Math.max(best, run); } else run = 0;
+  }
+  return best;
+}
 
 export default function HabitLog() {
   const { user } = useAuth();
@@ -16,10 +33,7 @@ export default function HabitLog() {
     enabled: !!user,
     queryFn: async () => {
       const { data, error } = await supabase
-        .from("habits")
-        .select("*")
-        .eq("user_id", user!.id)
-        .order("position");
+        .from("habits").select("*").eq("user_id", user!.id).order("position");
       if (error) throw error;
       return data ?? [];
     },
@@ -31,18 +45,17 @@ export default function HabitLog() {
     queryFn: async () => {
       const since = subDays(today, 27).toISOString().slice(0, 10);
       const { data, error } = await supabase
-        .from("habit_logs")
-        .select("habit_id, logged_date")
-        .eq("user_id", user!.id)
-        .gte("logged_date", since);
+        .from("habit_logs").select("habit_id, logged_date")
+        .eq("user_id", user!.id).gte("logged_date", since);
       if (error) throw error;
       return data ?? [];
     },
   });
 
-  const logSet = new Set(
-    (logs as any[]).map((l) => `${l.habit_id}:${l.logged_date}`)
-  );
+  const logSet = new Set((logs as any[]).map((l) => `${l.habit_id}:${l.logged_date}`));
+
+  const buildRow = (habitId: string) =>
+    days.map((d) => (logSet.has(`${habitId}:${d}`) ? 1 : 0));
 
   return (
     <div className="flex flex-1 flex-col overflow-y-auto">
@@ -51,20 +64,16 @@ export default function HabitLog() {
       <div className="px-5 pt-2">
         <div className="mb-2 flex items-baseline gap-3">
           <span className="font-mono text-[10px] uppercase tracking-[0.18em] text-ink-3">
-            EVERYDAY GOALS · LOG
+            EVERYDAY GOALS · STREAKS
           </span>
           <div className="h-px flex-1 bg-ink/10" />
-          <span className="font-mono text-[10px] uppercase tracking-[0.05em] text-ink-3">
-            28 D
-          </span>
         </div>
-        <h1 className="font-display text-[24px] leading-[1.05] text-ink">
-          A month of{" "}
-          <em className="font-serif not-italic font-normal italic">small things</em>.
+        <h1 className="font-display text-[28px] leading-[1.05] text-ink">
+          On a <em className="font-serif not-italic font-normal italic">roll</em>.
         </h1>
       </div>
 
-      <div className="flex-1 px-5 pt-4 pb-8 space-y-6">
+      <div className="flex-1 px-5 pt-5 pb-8 space-y-4">
         {(habits as any[]).length === 0 ? (
           <p className="font-serif text-[14px] italic text-ink-3 py-4">
             No everyday goals yet. Add them in Profile.
@@ -72,39 +81,50 @@ export default function HabitLog() {
         ) : (
           (habits as any[]).map((h) => {
             const accent = `hsl(var(${h.accent_var || "--j-brain"}))`;
-            const count = days.filter((d) =>
-              logSet.has(`${h.id}:${d}`)
-            ).length;
+            const row = buildRow(h.id);
+            const cur = calcCurrentStreak(row);
+            const best = calcBestStreak(row);
 
             return (
-              <div key={h.id}>
-                <div className="mb-2 flex items-baseline gap-2">
-                  <span className="font-serif text-[15px] text-ink">
-                    {h.emoji} {h.title}
+              <div
+                key={h.id}
+                className="rounded border border-line-strong bg-card-paper px-4 py-3.5"
+              >
+                {/* Header */}
+                <div className="mb-3 flex items-center gap-2.5">
+                  <span className="text-[20px]">{h.emoji}</span>
+                  <span className="flex-1 font-serif text-[16px] font-medium text-ink">
+                    {h.title}
                   </span>
-                  <span className="font-mono text-[9px] tracking-[0.1em] text-ink-3">
-                    {count}/28
-                  </span>
+                  <div className="flex items-center gap-1" style={{ color: "hsl(var(--accent))" }}>
+                    <Flame className="h-3.5 w-3.5" />
+                    <span className="font-display text-[22px] leading-none">{cur}</span>
+                  </div>
                 </div>
-                <div
-                  className="grid gap-1"
-                  style={{ gridTemplateColumns: "repeat(28, 1fr)" }}
-                >
-                  {days.map((d) => {
-                    const filled = logSet.has(`${h.id}:${d}`);
-                    return (
-                      <div
-                        key={d}
-                        title={format(new Date(d + "T00:00:00"), "MMM d")}
-                        className="aspect-square rounded-sm border"
-                        style={
-                          filled
-                            ? { background: accent, borderColor: accent, opacity: 0.85 }
-                            : { background: "transparent", borderColor: "hsl(var(--ink) / 0.10)", opacity: 0.4 }
-                        }
-                      />
-                    );
-                  })}
+
+                {/* Sparkline strip */}
+                <div className="mb-2 flex h-6 items-end gap-[2px]">
+                  {row.map((v, i) => (
+                    <div
+                      key={i}
+                      className="flex-1 rounded-sm"
+                      style={{
+                        height: v === 1 ? "100%" : "20%",
+                        background: v === 1 ? accent : "hsl(var(--ink) / 0.15)",
+                        opacity: v === 1 ? 0.9 : 1,
+                      }}
+                    />
+                  ))}
+                </div>
+
+                {/* Footer */}
+                <div className="flex justify-between">
+                  <span className="font-mono text-[9px] uppercase tracking-[0.1em] text-ink-3">
+                    28 D AGO
+                  </span>
+                  <span className="font-mono text-[9px] uppercase tracking-[0.1em] text-ink-3">
+                    BEST · {best} D
+                  </span>
                 </div>
               </div>
             );
