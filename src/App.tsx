@@ -7,6 +7,8 @@ import { AppShell } from "@/components/AppShell";
 import Home from "./pages/Home";
 import JournalSession from "./pages/JournalSession";
 import History from "./pages/History";
+import HabitLog from "./pages/HabitLog";
+import HabitsCheckin from "./pages/HabitsCheckin";
 import Profile from "./pages/Profile";
 import NotFound from "./pages/NotFound";
 
@@ -21,6 +23,8 @@ const App = () => (
           <Routes>
             <Route path="/" element={<AppShell><Home /></AppShell>} />
             <Route path="/journal/:type" element={<AppShell hideNav><JournalSession /></AppShell>} />
+            <Route path="/habit-log" element={<AppShell><HabitLog /></AppShell>} />
+            <Route path="/habits" element={<AppShell hideNav><HabitsCheckin /></AppShell>} />
             <Route path="/history" element={<AppShell><History /></AppShell>} />
             <Route path="/profile" element={<AppShell><Profile /></AppShell>} />
             <Route path="/auth" element={<Navigate to="/" replace />} />

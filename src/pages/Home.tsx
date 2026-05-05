@@ -1,12 +1,12 @@
-import { useMemo } from "react";
-import { useQuery } from "@tanstack/react-query";
+import { useMemo, useState } from "react";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Link } from "react-router-dom";
 import { format } from "date-fns";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { useProfile } from "@/hooks/useProfile";
 import { JOURNAL_LIST, TOTAL_RITUALS } from "@/lib/journals";
-import { Flame, Check } from "lucide-react";
+import { Flame, Check, ChevronRight, Repeat2 } from "lucide-react";
 
 function calcStreak(dates: string[]): number {
   if (!dates.length) return 0;
@@ -34,7 +34,10 @@ function greeting(d: Date) {
 export default function Home() {
   const { user } = useAuth();
   const { data: profile } = useProfile();
+  const queryClient = useQueryClient();
   const today = new Date();
+  const todayKey = today.toISOString().slice(0, 10);
+  const [habitsOpen, setHabitsOpen] = useState(false);
 
   const { data: completionDates = [] } = useQuery({
     queryKey: ["streak", user?.id],
@@ -52,8 +55,58 @@ export default function Home() {
     },
   });
 
+  const { data: habits = [] } = useQuery({
+    queryKey: ["habits", user?.id],
+    enabled: !!user,
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("habits")
+        .select("*")
+        .eq("user_id", user!.id)
+        .order("position");
+      if (error) throw error;
+      return data ?? [];
+    },
+  });
+
+  const { data: habitLogs = [] } = useQuery({
+    queryKey: ["habit_logs_today", user?.id, todayKey],
+    enabled: !!user,
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("habit_logs")
+        .select("habit_id")
+        .eq("user_id", user!.id)
+        .eq("logged_date", todayKey);
+      if (error) throw error;
+      return data ?? [];
+    },
+  });
+
+  const doneHabits = new Set(habitLogs.map((l: any) => l.habit_id));
+
+  const toggleHabit = useMutation({
+    mutationFn: async (habitId: string) => {
+      if (doneHabits.has(habitId)) {
+        await supabase.from("habit_logs").delete()
+          .eq("user_id", user!.id)
+          .eq("habit_id", habitId)
+          .eq("logged_date", todayKey);
+      } else {
+        await supabase.from("habit_logs").insert({
+          user_id: user!.id,
+          habit_id: habitId,
+          logged_date: todayKey,
+        });
+      }
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["habit_logs_today"] });
+      queryClient.invalidateQueries({ queryKey: ["habit_logs_28d"] });
+    },
+  });
+
   const streak = calcStreak(completionDates.map((d) => d.created_at as string));
-  const todayKey = today.toISOString().slice(0, 10);
   const completedToday = useMemo(() => {
     const set = new Set<string>();
     completionDates.forEach((e: any) => {
@@ -107,7 +160,78 @@ export default function Home() {
       </div>
 
       {/* Cards */}
-      <div className="flex flex-1 flex-col px-5 pb-4 pt-2">
+      <div className="flex flex-1 flex-col px-5 pb-4 pt-2 gap-2">
+
+        {/* Habits tile */}
+        <div className="overflow-hidden rounded border border-line-strong bg-card-paper">
+          <button
+            className="relative flex w-full items-center gap-3 px-3.5 py-3 text-left"
+            onClick={() => setHabitsOpen(!habitsOpen)}
+          >
+            <div
+              className="flex h-10 w-10 shrink-0 items-center justify-center rounded border border-ink bg-paper"
+              style={{ color: "hsl(var(--j-retrieval))" }}
+            >
+              <Repeat2 className="h-4 w-4" strokeWidth={1.6} />
+            </div>
+            <div className="min-w-0 flex-1">
+              <div className="flex items-baseline gap-2">
+                <h3 className="font-serif text-[16px] font-medium leading-tight text-ink">Habits</h3>
+              </div>
+              <p className="mt-0.5 text-[11.5px] leading-snug text-ink-2">
+                {doneHabits.size} of {habits.length} kept · tap to mark
+              </p>
+            </div>
+            <ChevronRight
+              className="h-4 w-4 shrink-0 text-ink-3 transition-transform duration-200"
+              style={{ transform: habitsOpen ? "rotate(90deg)" : "rotate(0deg)" }}
+            />
+          </button>
+
+          {habitsOpen && (
+            <div className="border-t border-line px-3.5 pb-3 pt-2">
+              {habits.length === 0 ? (
+                <p className="py-1 font-serif text-[13px] italic text-ink-3">
+                  No habits yet. Open full check-in to add.
+                </p>
+              ) : (
+                <div className="space-y-2">
+                  {(habits as any[]).map((h) => {
+                    const done = doneHabits.has(h.id);
+                    const accent = `hsl(var(${h.accent_var || "--j-brain"}))`;
+                    return (
+                      <button
+                        key={h.id}
+                        onClick={() => toggleHabit.mutate(h.id)}
+                        className="flex w-full items-center gap-2.5 py-0.5"
+                      >
+                        <div
+                          className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full border transition-colors"
+                          style={done ? { background: accent, borderColor: accent } : { borderColor: accent }}
+                        >
+                          {done && <Check className="h-3 w-3 text-paper" strokeWidth={2.4} />}
+                        </div>
+                        <span
+                          className={`font-serif text-[14px] text-left ${done ? "line-through text-ink-3" : "text-ink"}`}
+                        >
+                          {h.emoji} {h.title}
+                        </span>
+                      </button>
+                    );
+                  })}
+                </div>
+              )}
+              <Link
+                to="/habits"
+                className="mt-3 block w-full rounded border border-ink bg-paper px-3 py-2 text-center font-mono text-[10px] uppercase tracking-[0.12em] text-ink"
+              >
+                Open full check-in
+              </Link>
+            </div>
+          )}
+        </div>
+
+        {/* Journal ritual cards */}
         <div className="flex flex-1 flex-col justify-between gap-2">
           {JOURNAL_LIST.map((j) => {
             const Icon = j.icon;

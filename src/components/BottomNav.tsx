@@ -1,10 +1,11 @@
-import { Home as HomeIcon, BookOpen, User } from "lucide-react";
+import { Home as HomeIcon, Activity, BookOpen, User } from "lucide-react";
 import { NavLink } from "react-router-dom";
 import { cn } from "@/lib/utils";
 
 const items = [
   { to: "/", label: "Today", icon: HomeIcon, end: true },
-  { to: "/history", label: "History", icon: BookOpen, end: false },
+  { to: "/habit-log", label: "Habit Log", icon: Activity, end: false },
+  { to: "/history", label: "Diary", icon: BookOpen, end: false },
   { to: "/profile", label: "Profile", icon: User, end: false },
 ];
 
